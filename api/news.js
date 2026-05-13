@@ -144,17 +144,26 @@ function getTag(xml, tag) {
 }
 
 function clean(text = "") {
-  return String(text)
+  let value = String(text);
+
+  for (let i = 0; i < 3; i++) {
+    value = value
+      .replace(/&nbsp;/g, " ")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">");
+  }
+
+  return value
     .replace(/<!\[CDATA\[|\]\]>/g, "")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
     .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
     .replace(/<font\b[^>]*>(.*?)<\/font>/gi, " $1")
     .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, "&")
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
     .replace(/\s+/g, " ")
     .trim();
 }
