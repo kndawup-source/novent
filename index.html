@@ -852,9 +852,17 @@ function renderNews(data){
 
       <div>
         <h3>
-          ${escapeHtml(stripHtml(item.title))}
-          <span class="source-pill">${item.sourceType === "naver" ? "NAVER" : "GOOGLE"}</span>
-        </h3>
+  <a class="headline-link"
+     href="${item.link}"
+     target="_blank"
+     rel="noopener">
+     ${escapeHtml(stripHtml(item.title))}
+  </a>
+
+  <span class="media-name">
+    ${escapeHtml(stripHtml(item.source))}
+  </span>
+</h3>
         <p>${escapeHtml(stripHtml(item.summary))}</p>
         <p><strong>대표 인사이트:</strong> ${escapeHtml(stripHtml(item.insight))}</p>
         <p>${escapeHtml(stripHtml(item.source))} · ${formatDate(item.pubDate)}</p>
