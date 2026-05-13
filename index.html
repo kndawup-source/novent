@@ -32,49 +32,17 @@ html,body{
 button,input,select{font-family:inherit}
 button{cursor:pointer}
 
-.app{
-  max-width:1180px;
-  margin:0 auto;
-  padding:24px;
-}
+.app{max-width:1180px;margin:0 auto;padding:24px}
 
-.header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-  margin-bottom:22px;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
+.header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:12px}
 .logo-mark{
-  width:38px;
-  height:38px;
-  flex:0 0 38px;
-  border-radius:14px;
+  width:38px;height:38px;flex:0 0 38px;border-radius:14px;
   background:linear-gradient(135deg,var(--accent),#73ff9c);
   box-shadow:0 12px 34px rgba(217,255,95,.2);
 }
-
-.logo-text strong{
-  display:block;
-  font-size:24px;
-  letter-spacing:-.8px;
-  font-weight:950;
-}
-
-.logo-text span{
-  display:block;
-  margin-top:4px;
-  color:var(--muted);
-  font-size:12px;
-  font-weight:800;
-}
+.logo-text strong{display:block;font-size:24px;letter-spacing:-.8px;font-weight:950}
+.logo-text span{display:block;margin-top:4px;color:var(--muted);font-size:12px;font-weight:800}
 
 .hero{
   background:
@@ -85,59 +53,21 @@ button{cursor:pointer}
   padding:30px;
   box-shadow:var(--shadow);
 }
-
-.hero h1{
-  margin:0 0 12px;
-  font-size:36px;
-  line-height:1.15;
-  letter-spacing:-1.8px;
-}
-
-.hero p{
-  margin:0;
-  max-width:820px;
-  color:var(--soft);
-  line-height:1.6;
-  font-size:15px;
-}
+.hero h1{margin:0 0 12px;font-size:36px;line-height:1.15;letter-spacing:-1.8px}
+.hero p{margin:0;max-width:820px;color:var(--soft);line-height:1.6;font-size:15px}
 
 .signal-box{
-  margin-top:22px;
-  padding:18px;
-  border-radius:22px;
+  margin-top:22px;padding:18px;border-radius:22px;
   background:rgba(6,17,12,.58);
   border:1px solid rgba(217,255,95,.22);
 }
-
-.signal-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:12px;
-  margin-bottom:8px;
-}
-
-.signal-title{
-  font-size:20px;
-  font-weight:950;
-  color:var(--accent);
-}
-
+.signal-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.signal-title{font-size:20px;font-weight:950;color:var(--accent)}
 .signal-score{
-  padding:7px 10px;
-  border-radius:999px;
-  background:rgba(217,255,95,.12);
-  color:var(--accent);
-  font-size:12px;
-  font-weight:950;
-  white-space:nowrap;
+  padding:7px 10px;border-radius:999px;background:rgba(217,255,95,.12);
+  color:var(--accent);font-size:12px;font-weight:950;white-space:nowrap;
 }
-
-.signal-summary{
-  color:var(--soft);
-  line-height:1.5;
-  font-size:14px;
-}
+.signal-summary{color:var(--soft);line-height:1.5;font-size:14px}
 
 .signal-strip{
   display:grid;
@@ -145,40 +75,16 @@ button{cursor:pointer}
   gap:10px;
   margin:18px 0;
 }
-
 .signal-item{
   background:var(--panel);
   border:1px solid var(--line);
   border-radius:22px;
   padding:16px;
 }
-
-.signal-item small{
-  display:block;
-  color:var(--muted);
-  font-size:12px;
-  font-weight:900;
-  margin-bottom:8px;
-}
-
-.signal-item strong{
-  display:block;
-  font-size:24px;
-  font-weight:950;
-  letter-spacing:-.7px;
-}
-
-.signal-item span{
-  display:block;
-  margin-top:6px;
-  color:var(--soft);
-  font-size:12px;
-  line-height:1.35;
-}
-
-.up{color:var(--accent)}
-.down{color:var(--red)}
-.blue{color:var(--blue)}
+.signal-item small{display:block;color:var(--muted);font-size:12px;font-weight:900;margin-bottom:8px}
+.signal-item strong{display:block;font-size:24px;font-weight:950;letter-spacing:-.7px}
+.signal-item span{display:block;margin-top:6px;color:var(--soft);font-size:12px;line-height:1.35}
+.up{color:var(--accent)}.down{color:var(--red)}.blue{color:var(--blue)}
 
 .panel{
   background:var(--panel);
@@ -187,27 +93,9 @@ button{cursor:pointer}
   padding:20px;
   margin-top:14px;
 }
-
-.panel-title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  margin-bottom:14px;
-}
-
-.panel-title h2{
-  margin:0;
-  font-size:20px;
-  letter-spacing:-.4px;
-}
-
-.panel-title span{
-  color:var(--muted);
-  font-size:13px;
-  font-weight:800;
-  white-space:nowrap;
-}
+.panel-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.panel-title h2{margin:0;font-size:20px;letter-spacing:-.4px}
+.panel-title span{color:var(--muted);font-size:13px;font-weight:800;white-space:nowrap}
 
 .toolbar{
   display:grid;
@@ -215,7 +103,6 @@ button{cursor:pointer}
   gap:10px;
   margin-bottom:10px;
 }
-
 .toolbar.sub{
   grid-template-columns:1fr 1fr 150px;
   margin-bottom:14px;
@@ -241,28 +128,11 @@ button{
   font-size:14px;
 }
 
-.main-btn{
-  background:var(--accent);
-  color:#12200f;
-}
+.main-btn{background:var(--accent);color:#12200f}
+.sub-btn{background:#14291c;color:var(--text);border:1px solid rgba(255,255,255,.1)}
 
-.sub-btn{
-  background:#14291c;
-  color:var(--text);
-  border:1px solid rgba(255,255,255,.1);
-}
-
-.status{
-  color:var(--muted);
-  font-size:14px;
-  margin:6px 0 14px;
-  line-height:1.5;
-}
-
-.news-list{
-  display:grid;
-  gap:10px;
-}
+.status{color:var(--muted);font-size:14px;margin:6px 0 14px;line-height:1.5}
+.news-list{display:grid;gap:10px}
 
 .news{
   display:grid;
@@ -274,10 +144,29 @@ button{
   border-radius:22px;
   padding:15px;
 }
+.news,.news *{min-width:0}
 
-.news,
-.news *{
-  min-width:0;
+.news.compact{
+  grid-template-columns:1fr;
+  padding:13px 14px;
+}
+
+.news.compact h3{
+  margin:0;
+  font-size:14.5px;
+}
+
+.news.compact .compact-meta{
+  display:flex;
+  gap:7px;
+  align-items:center;
+  margin-bottom:7px;
+}
+
+.news.compact .compact-date{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
 }
 
 .tag{
@@ -302,14 +191,8 @@ button{
   word-break:keep-all;
 }
 
-.headline-link{
-  color:var(--text);
-  text-decoration:none;
-}
-
-.headline-link:hover{
-  color:var(--accent);
-}
+.headline-link{color:var(--text);text-decoration:none}
+.headline-link:hover{color:var(--accent)}
 
 .news p{
   margin:0 0 6px;
@@ -320,58 +203,51 @@ button{
   word-break:keep-all;
 }
 
-.graph-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
+.insight-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:10px 0 7px;
 }
+.insight-tags span{
+  padding:6px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  color:var(--soft);
+  font-size:11px;
+  font-weight:900;
+}
+.date-text{color:var(--muted)!important;font-size:12px!important}
 
+.graph-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chart-box{
   background:var(--panel2);
   border:1px solid rgba(255,255,255,.075);
   border-radius:22px;
   padding:16px;
 }
+.chart-box h3{margin:0 0 12px;font-size:16px}
 
-.chart-box h3{
-  margin:0 0 12px;
-  font-size:16px;
-}
-
-.keyword-bars{
+.keyword-bars,.category-bars{display:grid;gap:10px}
+.keyword-row,.category-row{
   display:grid;
-  gap:10px;
-}
-
-.keyword-row{
-  display:grid;
-  grid-template-columns:72px 1fr 32px;
+  grid-template-columns:72px 1fr 34px;
   align-items:center;
   gap:10px;
   color:var(--soft);
   font-size:12px;
   font-weight:900;
 }
-
-.keyword-track{
-  height:8px;
+.keyword-track,.category-track{
+  height:9px;
   border-radius:999px;
   background:rgba(255,255,255,.08);
   overflow:hidden;
 }
+.keyword-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),#7dff9b)}
+.category-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--accent))}
 
-.keyword-fill{
-  height:100%;
-  border-radius:999px;
-  background:linear-gradient(90deg,var(--accent),#7dff9b);
-}
-
-.flow-chart{
-  width:100%;
-  height:170px;
-  display:block;
-}
-
+.flow-chart{width:100%;height:170px;display:block}
 .flow-labels{
   display:grid;
   grid-template-columns:repeat(6,1fr);
@@ -382,45 +258,8 @@ button{
   font-weight:800;
   text-align:center;
 }
-
-.flow-summary{
-  margin-top:12px;
-  color:var(--soft);
-  font-size:13px;
-  line-height:1.45;
-}
-
-.flow-summary strong{
-  color:var(--accent);
-}
-
-.category-bars{
-  display:grid;
-  gap:10px;
-}
-
-.category-row{
-  display:grid;
-  grid-template-columns:72px 1fr 34px;
-  align-items:center;
-  gap:10px;
-  color:var(--soft);
-  font-size:12px;
-  font-weight:900;
-}
-
-.category-track{
-  height:10px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  overflow:hidden;
-}
-
-.category-fill{
-  height:100%;
-  border-radius:999px;
-  background:linear-gradient(90deg,var(--blue),var(--accent));
-}
+.flow-summary{margin-top:12px;color:var(--soft);font-size:13px;line-height:1.45}
+.flow-summary strong{color:var(--accent)}
 
 .action-grid{
   display:grid;
@@ -428,111 +267,40 @@ button{
   gap:12px;
   margin-top:14px;
 }
-
 .action-card{
   background:var(--panel);
   border:1px solid var(--line);
   border-radius:24px;
   padding:18px;
 }
+.action-card h3{margin:0 0 10px;font-size:17px}
+.action-card ul{margin:0;padding-left:18px;color:var(--soft);line-height:1.7;font-size:14px}
 
-.action-card h3{
-  margin:0 0 10px;
-  font-size:17px;
-}
-
-.action-card ul{
-  margin:0;
-  padding-left:18px;
-  color:var(--soft);
-  line-height:1.7;
-  font-size:14px;
-}
-
-.footer{
-  text-align:center;
-  color:#728476;
-  font-size:12px;
-  margin:24px 0 8px;
-}
+.footer{text-align:center;color:#728476;font-size:12px;margin:24px 0 8px}
 
 @media(max-width:820px){
   .app{padding:16px}
-
-  .header{
-    align-items:flex-start;
-    gap:10px;
-  }
-
+  .header{align-items:flex-start;gap:10px}
   .brand{gap:10px}
-
-  .logo-mark{
-    width:34px;
-    height:34px;
-    flex-basis:34px;
-  }
-
+  .logo-mark{width:34px;height:34px;flex-basis:34px}
   .logo-text strong{font-size:21px}
   .logo-text span{font-size:11px}
 
-  .hero{
-    padding:24px;
-    border-radius:26px;
-  }
+  .hero{padding:24px;border-radius:26px}
+  .hero h1{font-size:28px;letter-spacing:-1.2px}
+  .hero p{font-size:14px}
+  .signal-top{flex-direction:column}
 
-  .hero h1{
-    font-size:28px;
-    letter-spacing:-1.2px;
-  }
+  .signal-strip{grid-template-columns:1fr 1fr}
+  .signal-item{padding:14px;border-radius:18px}
+  .signal-item strong{font-size:21px}
 
-  .hero p{
-    font-size:14px;
-  }
+  .toolbar,.toolbar.sub{grid-template-columns:1fr}
+  .panel{padding:16px;border-radius:24px}
+  .panel-title{align-items:flex-start;flex-direction:column;gap:4px}
 
-  .signal-top{
-    flex-direction:column;
-  }
-
-  .signal-strip{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .signal-item{
-    padding:14px;
-    border-radius:18px;
-  }
-
-  .signal-item strong{
-    font-size:21px;
-  }
-
-  .toolbar,
-  .toolbar.sub{
-    grid-template-columns:1fr;
-  }
-
-  .panel{
-    padding:16px;
-    border-radius:24px;
-  }
-
-  .panel-title{
-    align-items:flex-start;
-    flex-direction:column;
-    gap:4px;
-  }
-
-  .news{
-    grid-template-columns:1fr;
-    gap:10px;
-    padding:14px;
-  }
-
-  .news .tag{
-    width:auto;
-    justify-content:flex-start;
-  }
-
+  .news{grid-template-columns:1fr;gap:10px;padding:14px}
+  .news .tag{width:auto;justify-content:flex-start}
   .news h3{
     font-size:15px;
     display:-webkit-box;
@@ -540,7 +308,6 @@ button{
     -webkit-box-orient:vertical;
     overflow:hidden;
   }
-
   .news p{
     font-size:12.5px;
     display:-webkit-box;
@@ -549,18 +316,31 @@ button{
     overflow:hidden;
   }
 
-  .graph-grid,
-  .action-grid{
-    grid-template-columns:1fr;
+  .news.mobile-compact{
+    padding:12px 13px;
   }
 
-  .flow-chart{
-    height:140px;
+  .news.mobile-compact .tag{
+    padding:6px 8px;
+    font-size:11px;
   }
 
-  .flow-labels{
-    font-size:10px;
+  .news.mobile-compact h3{
+    margin:0;
+    font-size:14px;
+    line-height:1.38;
   }
+
+  .news.mobile-compact .compact-meta{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    margin-bottom:7px;
+  }
+
+  .graph-grid,.action-grid{grid-template-columns:1fr}
+  .flow-chart{height:140px}
+  .flow-labels{font-size:10px}
 }
 </style>
 </head>
@@ -579,14 +359,10 @@ button{
   </header>
 
   <section class="hero">
-    <h1>
-      태양광 산업의 흐름을 읽는<br>
-      가장 빠른 방법
-    </h1>
-
+    <h1>태양광 산업의 흐름을 읽는<br>가장 빠른 방법</h1>
     <p>
       정책 변화부터 REC/SMP, ESS, 계통 이슈까지
-      매일 확인해야 할 핵심 신호를
+      대표가 매일 확인해야 할 핵심 신호를
       NOVENT Solar가 정리합니다.
     </p>
 
@@ -625,18 +401,27 @@ button{
   <section class="panel">
     <div class="panel-title">
       <h2>산업 뉴스 분석</h2>
-      <span>최근 흐름 기준</span>
+      <span>빠른 주제 선택</span>
     </div>
 
     <div class="toolbar">
-      <input id="searchInput" value="태양광 OR 재생에너지 OR REC OR SMP OR ESS" />
+      <select id="quickSearch">
+        <option value="태양광 OR 재생에너지 OR REC OR SMP OR ESS">전체 흐름</option>
+        <option value="태양광 정책 OR 재생에너지 정책 OR 산업부 태양광 OR 보조금">정책 변화</option>
+        <option value="REC OR SMP OR 전력시장 OR 전력거래 OR 태양광 수익">REC/SMP</option>
+        <option value="ESS OR 배터리 OR 전력저장 OR 인버터 OR 태양광 기술">ESS·기술</option>
+        <option value="계통 OR 접속지연 OR 송전 OR 배전 OR 태양광">계통 리스크</option>
+        <option value="태양광 화재 OR 고장 OR 유지보수 OR 안전">안전·유지보수</option>
+      </select>
+
       <select id="periodFilter">
         <option value="30" selected>최근 30일</option>
         <option value="90">최근 90일</option>
         <option value="365">최근 1년</option>
         <option value="all">전체</option>
       </select>
-      <button class="main-btn" onclick="loadNews()">뉴스 분석</button>
+
+      <button class="main-btn" onclick="loadNews()">분석 적용</button>
     </div>
 
     <div class="toolbar sub">
@@ -709,9 +494,7 @@ button{
     </div>
   </section>
 
-  <div class="footer">
-    NOVENT Solar · Commercial MVP
-  </div>
+  <div class="footer">NOVENT Solar · Commercial MVP</div>
 </div>
 
 <script>
@@ -719,7 +502,7 @@ let newsData = [];
 let currentSignal = null;
 
 async function loadNews(){
-  const keyword = document.getElementById("searchInput").value.trim();
+  const keyword = document.getElementById("quickSearch").value;
   const status = document.getElementById("status");
 
   status.textContent = "실제 뉴스를 수집하고 분석 중입니다...";
@@ -851,6 +634,10 @@ function renderStats(data){
   document.getElementById("marketScore").textContent = avg + "%";
 }
 
+function isMobileView(){
+  return window.matchMedia("(max-width:820px)").matches;
+}
+
 function renderNews(data){
   const list = document.getElementById("newsList");
 
@@ -867,27 +654,68 @@ function renderNews(data){
     return;
   }
 
-  list.innerHTML = data.map(item => `
-    <article class="news">
-      <div>
-        <div class="tag">${escapeHtml(item.category || "일반")}</div>
-      </div>
+  list.innerHTML = data.map((item, index) => {
+    const mobileCompact = isMobileView() && index >= 5;
 
-      <div>
-        <h3>
-          <a class="headline-link"
-             href="${item.link}"
-             target="_blank"
-             rel="noopener">
-            ${escapeHtml(stripHtml(item.title))}
-          </a>
-        </h3>
-        <p>${escapeHtml(stripHtml(item.summary))}</p>
-        <p><strong>대표 인사이트:</strong> ${escapeHtml(stripHtml(item.insight))}</p>
-        <p>${formatDate(item.pubDate)}</p>
-      </div>
-    </article>
-  `).join("");
+    if(mobileCompact){
+      return `
+        <article class="news compact mobile-compact">
+          <div class="compact-meta">
+            <div class="tag">${escapeHtml(item.category || "일반")}</div>
+            <div class="compact-date">${formatDate(item.pubDate)}</div>
+          </div>
+          <h3>
+            <a class="headline-link"
+               href="${item.link}"
+               target="_blank"
+               rel="noopener">
+              ${escapeHtml(stripHtml(item.title))}
+            </a>
+          </h3>
+        </article>
+      `;
+    }
+
+    return `
+      <article class="news">
+        <div>
+          <div class="tag">${escapeHtml(item.category || "일반")}</div>
+        </div>
+
+        <div>
+          <h3>
+            <a class="headline-link"
+               href="${item.link}"
+               target="_blank"
+               rel="noopener">
+              ${escapeHtml(stripHtml(item.title))}
+            </a>
+          </h3>
+          <p>${escapeHtml(stripHtml(item.summary))}</p>
+
+          <div class="insight-tags">
+            ${getInsightTags(item).map(tag => `<span>${escapeHtml(tag)}</span>`).join("")}
+          </div>
+
+          <p class="date-text">${formatDate(item.pubDate)}</p>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function getInsightTags(item){
+  const text = `${item.title || ""} ${item.summary || ""} ${item.insight || ""}`;
+  const tags = [];
+
+  if(/정책|산업부|보조금|지원사업|RPS|규제|고시/.test(text)) tags.push("정책 변화");
+  if(/REC|SMP|전력시장|가격|수익|전력거래/.test(text)) tags.push("수익성");
+  if(/ESS|배터리|저장/.test(text)) tags.push("ESS");
+  if(/계통|접속|지연|송전|배전/.test(text)) tags.push("계통 리스크");
+  if(/화재|고장|안전|민원|손실/.test(text)) tags.push("안전·유지보수");
+  if(/투자|금리|사업자|발전소|EPC/.test(text)) tags.push("사업 기회");
+
+  return tags.length ? tags.slice(0,4) : ["시장 참고"];
 }
 
 function renderKeywordBars(data){
@@ -1049,49 +877,21 @@ function renderActions(data = getFilteredData()){
 
   const checks = [];
 
-  if(policyCount > 0){
-    checks.push("정책 신호가 감지되었습니다. 보조금, 인허가, RPS, 산업부 발표 흐름을 확인하세요.");
-  }
-
-  if(marketCount > 0){
-    checks.push("시장 신호가 감지되었습니다. REC/SMP, 전력시장, 수익성 변동을 점검하세요.");
-  }
-
-  if(techCount > 0){
-    checks.push("기술 신호가 감지되었습니다. ESS, 인버터, 모듈 효율 관련 사업 기회를 검토하세요.");
-  }
-
-  if(riskCount > 0){
-    checks.push("리스크 신호가 감지되었습니다. 계통, 화재, 민원, 고장 이슈에 대비하세요.");
-  }
-
-  if(checks.length === 0){
-    checks.push("현재 강한 산업 신호는 감지되지 않았습니다. 검색어 또는 기간을 넓혀보세요.");
-  }
+  if(policyCount > 0) checks.push("정책 신호가 감지되었습니다. 보조금, 인허가, RPS, 산업부 발표 흐름을 확인하세요.");
+  if(marketCount > 0) checks.push("시장 신호가 감지되었습니다. REC/SMP, 전력시장, 수익성 변동을 점검하세요.");
+  if(techCount > 0) checks.push("기술 신호가 감지되었습니다. ESS, 인버터, 모듈 효율 관련 사업 기회를 검토하세요.");
+  if(riskCount > 0) checks.push("리스크 신호가 감지되었습니다. 계통, 화재, 민원, 고장 이슈에 대비하세요.");
+  if(checks.length === 0) checks.push("현재 강한 산업 신호는 감지되지 않았습니다. 검색어 또는 기간을 넓혀보세요.");
 
   checkList.innerHTML = checks.map(item => `<li>${escapeHtml(item)}</li>`).join("");
 
   const sales = [];
 
-  if(policyCount > 0){
-    sales.push("정책 이슈는 제안서 첫 장의 시장 배경 자료로 활용할 수 있습니다.");
-  }
-
-  if(techCount > 0){
-    sales.push("ESS·인버터·기술 이슈는 고부가 시공 또는 유지보수 제안 포인트로 활용할 수 있습니다.");
-  }
-
-  if(riskCount > 0){
-    sales.push("리스크 기사는 유지보수 계약, 안전점검, 사후관리 서비스 제안 근거로 활용할 수 있습니다.");
-  }
-
-  if(marketCount > 0){
-    sales.push("REC/SMP 관련 기사는 투자자·발전사업자 대상 수익성 상담 자료로 활용할 수 있습니다.");
-  }
-
-  if(sales.length === 0){
-    sales.push("분석된 기사가 부족합니다. 태양광, REC, SMP, ESS, 계통 등 키워드를 넓혀보세요.");
-  }
+  if(policyCount > 0) sales.push("정책 이슈는 제안서 첫 장의 시장 배경 자료로 활용할 수 있습니다.");
+  if(techCount > 0) sales.push("ESS·인버터·기술 이슈는 고부가 시공 또는 유지보수 제안 포인트로 활용할 수 있습니다.");
+  if(riskCount > 0) sales.push("리스크 기사는 유지보수 계약, 안전점검, 사후관리 서비스 제안 근거로 활용할 수 있습니다.");
+  if(marketCount > 0) sales.push("REC/SMP 관련 기사는 투자자·발전사업자 대상 수익성 상담 자료로 활용할 수 있습니다.");
+  if(sales.length === 0) sales.push("분석된 기사가 부족합니다. 태양광, REC, SMP, ESS, 계통 등 키워드를 넓혀보세요.");
 
   salesList.innerHTML = sales.map(item => `<li>${escapeHtml(item)}</li>`).join("");
 }
@@ -1137,6 +937,7 @@ function formatDate(date){
 document.getElementById("categoryFilter").addEventListener("change", render);
 document.getElementById("sortFilter").addEventListener("change", render);
 document.getElementById("periodFilter").addEventListener("change", render);
+window.addEventListener("resize", render);
 
 loadNews();
 </script>
