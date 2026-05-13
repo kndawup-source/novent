@@ -9,13 +9,25 @@ export default async function handler(req, res) {
   const query = req.query.q || "태양광 OR 재생에너지 OR REC OR SMP OR ESS";
 
   try {
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("Supabase 환경변수가 없습니다.");
+    }
+
     const naverArticles = await fetchNaverNews(query);
     const googleArticles = await fetchGoogleNews(query);
 
     const articles = removeDuplicates([
       ...naverArticles,
       ...googleArticles
-    ]).slice(0, 80);
+    ])
+      .map(article => ({
+        ...article,
+        finalScore: article.sourceType === "naver"
+          ? article.score + 8
+          : article.score
+      }))
+      .sort((a, b) => b.finalScore - a.finalScore)
+      .slice(0, 100);
 
     const rows = articles.map(article => ({
       title: article.title,
@@ -26,8 +38,8 @@ export default async function handler(req, res) {
       category: article.category,
       score: article.score,
       insight: article.insight,
-      pub_date: article.pubDate ? new Date(article.pubDate).toISOString() : null,
-      raw_text: `${article.title} ${article.summary}`
+      pub_date: parseDate(article.pubDate),
+      raw_text: `${article.title || ""} ${article.summary || ""}`
     }));
 
     const { data, error } = await supabase
@@ -68,7 +80,7 @@ async function fetchNaverNews(query) {
     "https://openapi.naver.com/v1/search/news.json?" +
     new URLSearchParams({
       query,
-      display: "40",
+      display: "50",
       sort: "date"
     });
 
@@ -85,23 +97,26 @@ async function fetchNaverNews(query) {
 
   const data = await response.json();
 
-  return (data.items || []).map(item => {
-    const title = clean(item.title);
-    const summary = clean(item.description);
-    const text = `${title} ${summary}`;
+  return (data.items || [])
+    .map(item => {
+      const title = clean(item.title);
+      const summary = clean(item.description);
+      const text = `${title} ${summary}`;
 
-    return {
-      sourceType: "naver",
-      source: "Naver",
-      title,
-      summary,
-      link: item.originallink || item.link,
-      pubDate: item.pubDate,
-      category: classify(text),
-      score: scoreArticle(text),
-      insight: makeInsight(text)
-    };
-  });
+      return {
+        sourceType: "naver",
+        source: "Naver",
+        title,
+        summary: summary || "요약 정보가 없습니다.",
+        link: item.originallink || item.link,
+        image: "",
+        pubDate: item.pubDate,
+        category: classify(text),
+        score: scoreArticle(text),
+        insight: makeInsight(text)
+      };
+    })
+    .filter(article => article.title && article.link);
 }
 
 async function fetchGoogleNews(query) {
@@ -123,13 +138,14 @@ async function fetchGoogleNews(query) {
   const xml = await response.text();
 
   return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
-    .slice(0, 40)
+    .slice(0, 50)
     .map(match => {
       const item = match[1];
 
       const title = clean(getTag(item, "title"));
-      const summary = clean(getTag(item, "description"));
       const source = clean(getTag(item, "source")) || "Google News";
+      const rawDescription = getTag(item, "description");
+      const summary = makeReadableSummary(rawDescription, title, source);
       const link = getTag(item, "link");
       const pubDate = getTag(item, "pubDate");
 
@@ -139,8 +155,9 @@ async function fetchGoogleNews(query) {
         sourceType: "google",
         source,
         title,
-        summary: summary || "요약 정보가 없습니다.",
+        summary,
         link,
+        image: "",
         pubDate,
         category: classify(text),
         score: scoreArticle(text),
@@ -158,7 +175,10 @@ function getTag(xml, tag) {
 function clean(text = "") {
   return String(text)
     .replace(/<!\[CDATA\[|\]\]>/g, "")
+    .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
+    .replace(/<font\b[^>]*>(.*?)<\/font>/gi, " $1")
     .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, "&")
     .replace(/&#39;/g, "'")
@@ -168,16 +188,35 @@ function clean(text = "") {
     .trim();
 }
 
+function makeReadableSummary(description = "", title = "", source = "") {
+  let text = clean(description);
+
+  if (title) {
+    text = text.replace(title, "").trim();
+  }
+
+  if (source) {
+    text = text.replace(source, "").trim();
+  }
+
+  text = text
+    .replace(/^[-–—·|:]+/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return text || "요약 정보가 없습니다.";
+}
+
 function classify(text) {
   if (/정부|정책|산업부|보조금|입찰|RPS|공급의무|규제|고시|지원사업/.test(text)) {
     return "정책";
   }
 
-  if (/REC|SMP|가격|수익|투자|전력시장|전기요금|매출|금리|계약/.test(text)) {
+  if (/REC|SMP|가격|수익|투자|전력시장|전기요금|매출|금리|계약|전력거래/.test(text)) {
     return "시장";
   }
 
-  if (/ESS|인버터|배터리|모듈|효율|AI|기술|저장|솔루션/.test(text)) {
+  if (/ESS|인버터|배터리|모듈|효율|AI|기술|저장|솔루션|전력저장/.test(text)) {
     return "기술";
   }
 
@@ -208,7 +247,8 @@ function scoreArticle(text) {
     "인버터",
     "리스크",
     "규제",
-    "지원사업"
+    "지원사업",
+    "전력거래"
   ].forEach(word => {
     if (text.includes(word)) {
       score += 4;
@@ -218,7 +258,7 @@ function scoreArticle(text) {
   if (/계통|지연|화재|규제|손실|민원/.test(text)) score += 8;
   if (/ESS|배터리|저장/.test(text)) score += 6;
   if (/REC|SMP|전력시장|가격/.test(text)) score += 6;
-  if (/정부|산업부|정책|보조금/.test(text)) score += 6;
+  if (/정부|산업부|정책|보조금|지원사업/.test(text)) score += 6;
 
   return Math.min(score, 98);
 }
@@ -228,7 +268,7 @@ function makeInsight(text) {
     return "신규 발전소 개발 일정과 계통 접속 가능성을 점검해야 합니다.";
   }
 
-  if (/REC|SMP|가격|전력시장/.test(text)) {
+  if (/REC|SMP|가격|전력시장|전력거래/.test(text)) {
     return "수익성 변동 가능성이 있어 REC/SMP 흐름과 계약 조건을 확인해야 합니다.";
   }
 
@@ -251,10 +291,7 @@ function removeDuplicates(articles) {
   const seen = new Set();
 
   return articles.filter(article => {
-    const key = article.link || article.title
-      .replace(/\s/g, "")
-      .replace(/[^\w가-힣]/g, "")
-      .slice(0, 44);
+    const key = normalizeKey(article.link || article.title);
 
     if (!key) return false;
     if (seen.has(key)) return false;
@@ -262,4 +299,25 @@ function removeDuplicates(articles) {
     seen.add(key);
     return true;
   });
+}
+
+function normalizeKey(value = "") {
+  return String(value)
+    .replace(/^https?:\/\//, "")
+    .replace(/[\?#].*$/, "")
+    .replace(/\s/g, "")
+    .replace(/[^\w가-힣/.-]/g, "")
+    .slice(0, 120);
+}
+
+function parseDate(value) {
+  if (!value) return null;
+
+  const date = new Date(value);
+
+  if (isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date.toISOString();
 }
