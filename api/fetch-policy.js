@@ -5,19 +5,31 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+const POLICY_QUERIES = [
+  "산업통상자원부 태양광",
+  "산업통상자원부 재생에너지",
+  "산업통상자원부 ESS",
+  "한국에너지공단 태양광",
+  "한국에너지공단 재생에너지",
+  "한국에너지공단 지원사업",
+  "전력거래소 태양광",
+  "전력거래소 REC",
+  "전력거래소 SMP",
+  "전력거래소 계통"
+];
+
 export default async function handler(req, res) {
   try {
-    const policies = [];
+    let allItems = [];
 
-    const motie = await fetchMOTIE();
-    const energy = await fetchEnergy();
-    const kpx = await fetchKPX();
+    for (const query of POLICY_QUERIES) {
+      const items = await fetchNaverPolicyNews(query);
+      allItems.push(...items);
+    }
 
-    policies.push(...motie);
-    policies.push(...energy);
-    policies.push(...kpx);
-
-    const unique = removeDuplicates(policies);
+    const unique = removeDuplicates(allItems)
+      .sort((a, b) => b.importance_score - a.importance_score)
+      .slice(0, 100);
 
     const rows = unique.map(item => ({
       title: item.title,
@@ -25,8 +37,8 @@ export default async function handler(req, res) {
       link: item.link,
       organization: item.organization,
       category: item.category,
-      published_at: item.publishedAt,
-      importance_score: item.score
+      published_at: item.published_at,
+      importance_score: item.importance_score
     }));
 
     const { data, error } = await supabase
@@ -38,125 +50,89 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
+      message: "정책/보도자료 동기화 완료",
+      fetched: unique.length,
       saved: data.length,
-      policies: data
+      items: data
     });
 
   } catch (error) {
     return res.status(500).json({
       ok: false,
+      message: "정책/보도자료 동기화 실패",
       error: error.message
     });
   }
 }
 
-async function fetchMOTIE() {
+async function fetchNaverPolicyNews(query) {
+  if (!process.env.NAVER_CLIENT_ID || !process.env.NAVER_CLIENT_SECRET) {
+    return [];
+  }
+
   const url =
-    "https://www.motie.go.kr/www/selectBbsNttList.do?bbsNo=81&key=86";
-
-  const response = await fetch(url);
-  const html = await response.text();
-
-  const results = [];
-
-  const regex =
-    /<a[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g;
-
-  const matches = [...html.matchAll(regex)].slice(0, 20);
-
-  matches.forEach(match => {
-    const title = clean(match[2]);
-
-    if (!isEnergyRelated(title)) return;
-
-    results.push({
-      organization: "산업통상자원부",
-      category: "정부발표",
-      title,
-      summary: "산업통상자원부 정책 및 보도자료",
-      link: absoluteUrl("https://www.motie.go.kr", match[1]),
-      publishedAt: new Date().toISOString(),
-      score: scorePolicy(title)
+    "https://openapi.naver.com/v1/search/news.json?" +
+    new URLSearchParams({
+      query,
+      display: "20",
+      sort: "date"
     });
+
+  const response = await fetch(url, {
+    headers: {
+      "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID,
+      "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET
+    }
   });
 
-  return results;
-}
+  if (!response.ok) return [];
 
-async function fetchEnergy() {
-  const url = "https://www.energy.or.kr";
+  const data = await response.json();
 
-  const response = await fetch(url);
-  const html = await response.text();
+  return (data.items || []).map(item => {
+    const title = clean(item.title);
+    const summary = clean(item.description);
+    const text = `${title} ${summary} ${query}`;
 
-  const results = [];
-
-  const regex =
-    /<a[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g;
-
-  const matches = [...html.matchAll(regex)].slice(0, 20);
-
-  matches.forEach(match => {
-    const title = clean(match[2]);
-
-    if (!isEnergyRelated(title)) return;
-
-    results.push({
-      organization: "한국에너지공단",
-      category: "지원사업",
+    return {
       title,
-      summary: "한국에너지공단 공지 및 지원사업",
-      link: absoluteUrl("https://www.energy.or.kr", match[1]),
-      publishedAt: new Date().toISOString(),
-      score: scorePolicy(title)
-    });
+      summary,
+      link: item.originallink || item.link,
+      organization: detectOrganization(text),
+      category: detectCategory(text),
+      published_at: item.pubDate ? new Date(item.pubDate).toISOString() : null,
+      importance_score: scorePolicy(text)
+    };
   });
-
-  return results;
 }
 
-async function fetchKPX() {
-  const url = "https://www.kpx.or.kr";
-
-  const response = await fetch(url);
-  const html = await response.text();
-
-  const results = [];
-
-  const regex =
-    /<a[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g;
-
-  const matches = [...html.matchAll(regex)].slice(0, 20);
-
-  matches.forEach(match => {
-    const title = clean(match[2]);
-
-    if (!isEnergyRelated(title)) return;
-
-    results.push({
-      organization: "전력거래소",
-      category: "전력시장",
-      title,
-      summary: "전력거래소 시장 및 계통 공지",
-      link: absoluteUrl("https://www.kpx.or.kr", match[1]),
-      publishedAt: new Date().toISOString(),
-      score: scorePolicy(title)
-    });
-  });
-
-  return results;
+function detectOrganization(text) {
+  if (/산업통상자원부|산업부/.test(text)) return "산업통상자원부";
+  if (/한국에너지공단|에너지공단/.test(text)) return "한국에너지공단";
+  if (/전력거래소|KPX/.test(text)) return "전력거래소";
+  return "정책/공공기관";
 }
 
-function isEnergyRelated(text) {
-  return /태양광|재생에너지|신재생|ESS|REC|SMP|전력|계통|에너지|배터리|전기/.test(text);
+function detectCategory(text) {
+  if (/보조금|지원사업|공모|사업공고/.test(text)) return "지원사업";
+  if (/REC|SMP|전력시장|전력거래/.test(text)) return "전력시장";
+  if (/계통|접속|송전|배전/.test(text)) return "계통";
+  if (/ESS|배터리|저장/.test(text)) return "ESS";
+  if (/정책|고시|제도|산업부|정부/.test(text)) return "정부발표";
+  return "정책자료";
 }
 
 function scorePolicy(text) {
   let score = 50;
 
   [
+    "산업통상자원부",
+    "산업부",
+    "한국에너지공단",
+    "전력거래소",
     "태양광",
     "재생에너지",
+    "신재생",
     "REC",
     "SMP",
     "ESS",
@@ -164,10 +140,10 @@ function scorePolicy(text) {
     "전력시장",
     "지원사업",
     "보조금",
-    "산업부",
-    "정책"
+    "정책",
+    "고시"
   ].forEach(word => {
-    if (text.includes(word)) score += 6;
+    if (text.includes(word)) score += 5;
   });
 
   return Math.min(score, 98);
@@ -175,32 +151,25 @@ function scorePolicy(text) {
 
 function clean(text = "") {
   return String(text)
+    .replace(/<!\[CDATA\[|\]\]>/g, "")
     .replace(/<[^>]*>/g, "")
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, "&")
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function absoluteUrl(base, path) {
-  if (!path) return base;
-
-  if (path.startsWith("http")) return path;
-
-  return base + path;
 }
 
 function removeDuplicates(items) {
   const seen = new Set();
 
   return items.filter(item => {
-    const key = item.link;
-
+    const key = item.link || item.title;
     if (!key) return false;
     if (seen.has(key)) return false;
-
     seen.add(key);
-
     return true;
   });
 }
