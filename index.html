@@ -831,7 +831,9 @@ function renderNews(data){
         <a href="${item.link}" target="_blank" rel="noopener">기사 보기</a>
       </div>
 
-      <div class="score">${Number(item.score || 0)}</div>
+      <div class="score-badge ${getScoreClass(item.score)}">
+  ${getScoreLabel(item.score)}
+</div>
     </article>
   `).join("");
 }
