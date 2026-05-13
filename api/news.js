@@ -1,6 +1,96 @@
 export default async function handler(req, res) {
   const query = req.query.q || "태양광 OR 재생에너지 OR REC OR SMP OR ESS";
 
+  try {
+    const naverArticles = await fetchNaverNews(query);
+    const googleArticles = await fetchGoogleNews(query);
+
+    const articles = removeDuplicates([
+      ...naverArticles,
+      ...googleArticles
+    ])
+      .map(article => ({
+        ...article,
+        finalScore: article.sourceType === "naver"
+          ? article.score + 8
+          : article.score
+      }))
+      .sort((a, b) => b.finalScore - a.finalScore)
+      .slice(0, 80);
+
+    const signal = createMarketSignal(articles);
+    const keywords = createKeywordTrend(articles);
+
+    return res.status(200).json({
+      ok: true,
+      brand: "NOVENT Solar",
+      sourceMode: "naver-main-google-assist",
+      count: articles.length,
+      naverCount: naverArticles.length,
+      googleCount: googleArticles.length,
+      signal,
+      keywords,
+      articles
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      message: "뉴스 데이터를 불러오지 못했습니다.",
+      error: error.message
+    });
+  }
+}
+
+async function fetchNaverNews(query) {
+  if (!process.env.NAVER_CLIENT_ID || !process.env.NAVER_CLIENT_SECRET) {
+    return [];
+  }
+
+  const url =
+    "https://openapi.naver.com/v1/search/news.json?" +
+    new URLSearchParams({
+      query,
+      display: "50",
+      sort: "date"
+    });
+
+  const response = await fetch(url, {
+    headers: {
+      "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID,
+      "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET
+    }
+  });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = await response.json();
+
+  return (data.items || [])
+    .map(item => {
+      const title = clean(item.title);
+      const summary = clean(item.description);
+      const text = `${title} ${summary}`;
+
+      return {
+        sourceType: "naver",
+        source: "Naver",
+        title,
+        summary: summary || "요약 정보가 없습니다.",
+        link: item.originallink || item.link,
+        image: "",
+        pubDate: item.pubDate,
+        category: classify(text),
+        score: scoreArticle(text),
+        insight: makeInsight(text)
+      };
+    })
+    .filter(article => article.title && article.link);
+}
+
+async function fetchGoogleNews(query) {
   const rssUrl =
     "https://news.google.com/rss/search?" +
     new URLSearchParams({
@@ -10,64 +100,42 @@ export default async function handler(req, res) {
       ceid: "KR:ko"
     });
 
-  try {
-    const response = await fetch(rssUrl);
+  const response = await fetch(rssUrl);
 
-    if (!response.ok) {
-      throw new Error("Google News RSS 호출 실패");
-    }
-
-    const xml = await response.text();
-
-    const articles = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
-      .slice(0, 50)
-      .map(match => {
-        const item = match[1];
-
-        const title = clean(getTag(item, "title"));
-        const summary = clean(getTag(item, "description"));
-        const link = getTag(item, "link");
-        const pubDate = getTag(item, "pubDate");
-        const source = clean(getTag(item, "source")) || "Google News";
-
-        const text = `${title} ${summary}`;
-
-        return {
-          sourceType: "google",
-          source,
-          title,
-          summary: summary || "요약 정보가 없습니다.",
-          link,
-          pubDate,
-          category: classify(text),
-          score: scoreArticle(text),
-          insight: makeInsight(text)
-        };
-      })
-      .filter(article => article.title);
-
-    const uniqueArticles = removeDuplicates(articles)
-      .sort((a, b) => b.score - a.score);
-
-    const signal = createMarketSignal(uniqueArticles);
-    const keywords = createKeywordTrend(uniqueArticles);
-
-    return res.status(200).json({
-      ok: true,
-      brand: "NOVENT Solar",
-      query,
-      count: uniqueArticles.length,
-      signal,
-      keywords,
-      articles: uniqueArticles
-    });
-  } catch (error) {
-    return res.status(500).json({
-      ok: false,
-      message: "실제 뉴스를 불러오지 못했습니다.",
-      error: error.message
-    });
+  if (!response.ok) {
+    return [];
   }
+
+  const xml = await response.text();
+
+  return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
+    .slice(0, 50)
+    .map(match => {
+      const item = match[1];
+
+      const title = clean(getTag(item, "title"));
+      const source = clean(getTag(item, "source")) || "Google News";
+      const rawDescription = getTag(item, "description");
+      const summary = makeReadableSummary(rawDescription, title, source);
+      const link = getTag(item, "link");
+      const pubDate = getTag(item, "pubDate");
+
+      const text = `${title} ${summary}`;
+
+      return {
+        sourceType: "google",
+        source,
+        title,
+        summary,
+        link,
+        image: "",
+        pubDate,
+        category: classify(text),
+        score: scoreArticle(text),
+        insight: makeInsight(text)
+      };
+    })
+    .filter(article => article.title && article.link);
 }
 
 function getTag(xml, tag) {
@@ -78,7 +146,10 @@ function getTag(xml, tag) {
 function clean(text = "") {
   return String(text)
     .replace(/<!\[CDATA\[|\]\]>/g, "")
+    .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
+    .replace(/<font\b[^>]*>(.*?)<\/font>/gi, " $1")
     .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, "&")
     .replace(/&#39;/g, "'")
@@ -88,12 +159,31 @@ function clean(text = "") {
     .trim();
 }
 
+function makeReadableSummary(description = "", title = "", source = "") {
+  let text = clean(description);
+
+  if (title) {
+    text = text.replace(title, "").trim();
+  }
+
+  if (source) {
+    text = text.replace(source, "").trim();
+  }
+
+  text = text
+    .replace(/^[-–—·|:]+/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return text || "요약 정보가 없습니다.";
+}
+
 function classify(text) {
-  if (/정부|정책|산업부|보조금|입찰|RPS|공급의무|규제|고시|지원사업|재생에너지정책/.test(text)) {
+  if (/정부|정책|산업부|보조금|입찰|RPS|공급의무|규제|고시|지원사업/.test(text)) {
     return "정책";
   }
 
-  if (/REC|SMP|가격|수익|투자|전력시장|전기요금|매출|금리|전력거래|계약/.test(text)) {
+  if (/REC|SMP|가격|수익|투자|전력시장|전기요금|매출|금리|계약|전력거래/.test(text)) {
     return "시장";
   }
 
@@ -111,7 +201,7 @@ function classify(text) {
 function scoreArticle(text) {
   let score = 45;
 
-  const importantWords = [
+  [
     "태양광",
     "재생에너지",
     "신재생",
@@ -128,17 +218,18 @@ function scoreArticle(text) {
     "인버터",
     "리스크",
     "규제",
-    "지원사업"
-  ];
-
-  importantWords.forEach(word => {
-    if (text.includes(word)) score += 4;
+    "지원사업",
+    "전력거래"
+  ].forEach(word => {
+    if (text.includes(word)) {
+      score += 4;
+    }
   });
 
   if (/계통|지연|화재|규제|손실|민원/.test(text)) score += 8;
   if (/ESS|배터리|저장/.test(text)) score += 6;
   if (/REC|SMP|전력시장|가격/.test(text)) score += 6;
-  if (/정부|산업부|정책|보조금/.test(text)) score += 6;
+  if (/정부|산업부|정책|보조금|지원사업/.test(text)) score += 6;
 
   return Math.min(score, 98);
 }
@@ -148,7 +239,7 @@ function makeInsight(text) {
     return "신규 발전소 개발 일정과 계통 접속 가능성을 점검해야 합니다.";
   }
 
-  if (/REC|SMP|가격|전력시장/.test(text)) {
+  if (/REC|SMP|가격|전력시장|전력거래/.test(text)) {
     return "수익성 변동 가능성이 있어 REC/SMP 흐름과 계약 조건을 확인해야 합니다.";
   }
 
@@ -171,10 +262,7 @@ function removeDuplicates(articles) {
   const seen = new Set();
 
   return articles.filter(article => {
-    const key = article.title
-      .replace(/\s/g, "")
-      .replace(/[^\w가-힣]/g, "")
-      .slice(0, 44);
+    const key = normalizeKey(article.link || article.title);
 
     if (!key) return false;
     if (seen.has(key)) return false;
@@ -184,6 +272,15 @@ function removeDuplicates(articles) {
   });
 }
 
+function normalizeKey(value = "") {
+  return String(value)
+    .replace(/^https?:\/\//, "")
+    .replace(/[\?#].*$/, "")
+    .replace(/\s/g, "")
+    .replace(/[^\w가-힣/.-]/g, "")
+    .slice(0, 120);
+}
+
 function createMarketSignal(articles) {
   const policy = articles.filter(a => a.category === "정책").length;
   const market = articles.filter(a => a.category === "시장").length;
@@ -191,7 +288,7 @@ function createMarketSignal(articles) {
   const risk = articles.filter(a => a.category === "리스크").length;
 
   const avgScore = articles.length
-    ? Math.round(articles.reduce((sum, a) => sum + a.score, 0) / articles.length)
+    ? Math.round(articles.reduce((sum, a) => sum + Number(a.score || 0), 0) / articles.length)
     : 0;
 
   let mood = "관망";
@@ -236,7 +333,7 @@ function createKeywordTrend(articles) {
 
   return keywords.map(keyword => {
     const count = articles.filter(article => {
-      const text = `${article.title} ${article.summary} ${article.insight}`;
+      const text = `${article.title || ""} ${article.summary || ""} ${article.insight || ""}`;
       return text.includes(keyword);
     }).length;
 
