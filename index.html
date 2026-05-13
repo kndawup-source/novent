@@ -337,19 +337,43 @@ button{
   overflow-wrap:anywhere;
 }
 
-.score{
-  text-align:right;
-  font-size:22px;
-  font-weight:950;
+.score-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.score-badge.high{
+  background:rgba(217,255,95,.16);
   color:var(--accent);
+}
+
+.score-badge.mid{
+  background:rgba(142,203,255,.14);
+  color:var(--blue);
+}
+
+.score-badge.low{
+  background:rgba(255,255,255,.08);
+  color:#dbe6dc;
+}
+
+.score-badge.normal{
+  background:rgba(255,255,255,.05);
+  color:#aebcb0;
 }
 
 .chart{
   display:flex;
   align-items:end;
-  gap:10px;
-  min-height:190px;
-  padding-top:20px;
+  gap:8px;
+  min-height:130px;
+  padding-top:12px;
 }
 
 .bar-wrap{
@@ -357,20 +381,20 @@ button{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:9px;
+  gap:8px;
 }
 
 .bar{
   width:100%;
-  max-width:58px;
-  min-height:18px;
-  border-radius:14px 14px 5px 5px;
+  max-width:44px;
+  min-height:14px;
+  border-radius:12px 12px 5px 5px;
   background:linear-gradient(180deg,var(--accent),#7dff9b);
 }
 
 .bar-label{
   color:var(--muted);
-  font-size:12px;
+  font-size:11px;
   font-weight:950;
   text-align:center;
 }
@@ -506,19 +530,23 @@ button{
     overflow:hidden;
   }
 
-  .score{
-    text-align:left;
-    font-size:18px;
+  .score-badge{
+    align-self:flex-start;
   }
 
   .chart{
-    gap:7px;
+    gap:6px;
+    min-height:110px;
     overflow-x:auto;
     padding-bottom:4px;
   }
 
   .bar-wrap{
-    min-width:52px;
+    min-width:48px;
+  }
+
+  .bar{
+    max-width:36px;
   }
 
   .report{
@@ -679,7 +707,6 @@ async function loadNews(){
 
     renderSignal(currentSignal);
     render();
-    renderReport();
 
     status.textContent =
       `총 ${newsData.length}개 수집 · 네이버 ${data.naverCount || 0}개 · 구글 ${data.googleCount || 0}개`;
@@ -690,7 +717,6 @@ async function loadNews(){
     currentKeywords = [];
     renderSignal(null);
     render();
-    renderReport();
   }
 }
 
@@ -808,7 +834,7 @@ function renderNews(data){
           <h3>표시할 실제 뉴스가 없습니다</h3>
           <p>검색어, 기간, 카테고리를 변경해보세요.</p>
         </div>
-        <div class="score">0</div>
+        <div class="score-badge normal">안내</div>
       </div>
     `;
     return;
@@ -822,20 +848,40 @@ function renderNews(data){
 
       <div>
         <h3>
-          ${escapeHtml(item.title)}
+          ${escapeHtml(stripHtml(item.title))}
           <span class="source-pill">${item.sourceType === "naver" ? "NAVER" : "GOOGLE"}</span>
         </h3>
-        <p>${escapeHtml(item.summary)}</p>
-        <p><strong>대표 인사이트:</strong> ${escapeHtml(item.insight)}</p>
-        <p>${escapeHtml(item.source)} · ${formatDate(item.pubDate)}</p>
+        <p>${escapeHtml(stripHtml(item.summary))}</p>
+        <p><strong>대표 인사이트:</strong> ${escapeHtml(stripHtml(item.insight))}</p>
+        <p>${escapeHtml(stripHtml(item.source))} · ${formatDate(item.pubDate)}</p>
         <a href="${item.link}" target="_blank" rel="noopener">기사 보기</a>
       </div>
 
       <div class="score-badge ${getScoreClass(item.score)}">
-  ${getScoreLabel(item.score)}
-</div>
+        ${getScoreLabel(item.score)}
+      </div>
     </article>
   `).join("");
+}
+
+function getScoreLabel(score){
+  const s = Number(score || 0);
+
+  if(s >= 85) return "핵심";
+  if(s >= 70) return "주요";
+  if(s >= 55) return "관심";
+
+  return "일반";
+}
+
+function getScoreClass(score){
+  const s = Number(score || 0);
+
+  if(s >= 85) return "high";
+  if(s >= 70) return "mid";
+  if(s >= 55) return "low";
+
+  return "normal";
 }
 
 function renderChart(data){
@@ -854,7 +900,7 @@ function renderChart(data){
   const chart = document.getElementById("chart");
 
   chart.innerHTML = chartData.map(item => {
-    const height = Math.max(18, Math.round((item.count / max) * 150));
+    const height = Math.max(14, Math.round((item.count / max) * 96));
 
     return `
       <div class="bar-wrap">
@@ -921,6 +967,28 @@ function renderReport(data = getFilteredData()){
   }
 
   salesList.innerHTML = sales.map(item => `<li>${escapeHtml(item)}</li>`).join("");
+}
+
+function stripHtml(str = ""){
+  let value = String(str || "");
+
+  for(let i = 0; i < 3; i++){
+    value = value
+      .replace(/&nbsp;/g, " ")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">");
+  }
+
+  return value
+    .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
+    .replace(/<font\b[^>]*>(.*?)<\/font>/gi, " $1")
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function escapeHtml(str){
