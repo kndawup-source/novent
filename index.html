@@ -6,14 +6,12 @@
 <title>NOVENT Solar</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
 :root{
   --bg:#06110c;
   --panel:#0b1911;
+  --panel2:#07140d;
   --line:rgba(255,255,255,.08);
   --text:#f1fff6;
   --muted:#91a797;
@@ -76,17 +74,6 @@ button{cursor:pointer}
   color:var(--muted);
   font-size:12px;
   font-weight:800;
-}
-
-.header-badge{
-  padding:9px 13px;
-  border:1px solid rgba(217,255,95,.32);
-  border-radius:999px;
-  color:var(--accent);
-  font-size:13px;
-  font-weight:900;
-  background:rgba(217,255,95,.05);
-  white-space:nowrap;
 }
 
 .hero{
@@ -152,32 +139,41 @@ button{cursor:pointer}
   font-size:14px;
 }
 
-.grid{
+.signal-strip{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:12px;
+  gap:10px;
   margin:18px 0;
 }
 
-.card{
+.signal-item{
   background:var(--panel);
   border:1px solid var(--line);
-  border-radius:24px;
-  padding:19px;
+  border-radius:22px;
+  padding:16px;
 }
 
-.card small{
+.signal-item small{
   display:block;
   color:var(--muted);
+  font-size:12px;
   font-weight:900;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 
-.card strong{
+.signal-item strong{
   display:block;
-  font-size:28px;
+  font-size:24px;
   font-weight:950;
-  letter-spacing:-.8px;
+  letter-spacing:-.7px;
+}
+
+.signal-item span{
+  display:block;
+  margin-top:6px;
+  color:var(--soft);
+  font-size:12px;
+  line-height:1.35;
 }
 
 .up{color:var(--accent)}
@@ -270,10 +266,10 @@ button{
 
 .news{
   display:grid;
-  grid-template-columns:96px minmax(0,1fr) 74px;
+  grid-template-columns:96px minmax(0,1fr);
   gap:14px;
   align-items:center;
-  background:#07140d;
+  background:var(--panel2);
   border:1px solid rgba(255,255,255,.075);
   border-radius:22px;
   padding:15px;
@@ -297,18 +293,6 @@ button{
   white-space:nowrap;
 }
 
-.source-pill{
-  display:inline-flex;
-  margin-left:6px;
-  padding:4px 7px;
-  border-radius:999px;
-  background:rgba(255,255,255,.06);
-  color:var(--muted);
-  font-size:11px;
-  font-weight:900;
-  vertical-align:middle;
-}
-
 .news h3{
   margin:0 0 7px;
   font-size:16px;
@@ -316,6 +300,15 @@ button{
   letter-spacing:-.2px;
   overflow-wrap:anywhere;
   word-break:keep-all;
+}
+
+.headline-link{
+  color:var(--text);
+  text-decoration:none;
+}
+
+.headline-link:hover{
+  color:var(--accent);
 }
 
 .news p{
@@ -327,97 +320,128 @@ button{
   word-break:keep-all;
 }
 
-.news a{
-  display:inline-block;
-  max-width:100%;
-  color:var(--accent);
-  text-decoration:none;
-  font-size:13px;
-  font-weight:950;
-  overflow-wrap:anywhere;
-}
-
-.score-badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:8px 10px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:900;
-  white-space:nowrap;
-}
-
-.score-badge.high{
-  background:rgba(217,255,95,.16);
-  color:var(--accent);
-}
-
-.score-badge.mid{
-  background:rgba(142,203,255,.14);
-  color:var(--blue);
-}
-
-.score-badge.low{
-  background:rgba(255,255,255,.08);
-  color:#dbe6dc;
-}
-
-.score-badge.normal{
-  background:rgba(255,255,255,.05);
-  color:#aebcb0;
-}
-
-.chart{
-  display:flex;
-  align-items:end;
-  gap:8px;
-  min-height:130px;
-  padding-top:12px;
-}
-
-.bar-wrap{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
-}
-
-.bar{
-  width:100%;
-  max-width:44px;
-  min-height:14px;
-  border-radius:12px 12px 5px 5px;
-  background:linear-gradient(180deg,var(--accent),#7dff9b);
-}
-
-.bar-label{
-  color:var(--muted);
-  font-size:11px;
-  font-weight:950;
-  text-align:center;
-}
-
-.report{
+.graph-grid{
   display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:12px;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
 }
 
-.report-card{
-  background:#07140d;
+.chart-box{
+  background:var(--panel2);
   border:1px solid rgba(255,255,255,.075);
   border-radius:22px;
-  padding:17px;
+  padding:16px;
 }
 
-.report-card h3{
-  margin:0 0 10px;
+.chart-box h3{
+  margin:0 0 12px;
   font-size:16px;
 }
 
-.report-card ul{
+.keyword-bars{
+  display:grid;
+  gap:10px;
+}
+
+.keyword-row{
+  display:grid;
+  grid-template-columns:72px 1fr 32px;
+  align-items:center;
+  gap:10px;
+  color:var(--soft);
+  font-size:12px;
+  font-weight:900;
+}
+
+.keyword-track{
+  height:8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  overflow:hidden;
+}
+
+.keyword-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--accent),#7dff9b);
+}
+
+.flow-chart{
+  width:100%;
+  height:170px;
+  display:block;
+}
+
+.flow-labels{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:4px;
+  margin-top:8px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  text-align:center;
+}
+
+.flow-summary{
+  margin-top:12px;
+  color:var(--soft);
+  font-size:13px;
+  line-height:1.45;
+}
+
+.flow-summary strong{
+  color:var(--accent);
+}
+
+.category-bars{
+  display:grid;
+  gap:10px;
+}
+
+.category-row{
+  display:grid;
+  grid-template-columns:72px 1fr 34px;
+  align-items:center;
+  gap:10px;
+  color:var(--soft);
+  font-size:12px;
+  font-weight:900;
+}
+
+.category-track{
+  height:10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  overflow:hidden;
+}
+
+.category-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--blue),var(--accent));
+}
+
+.action-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
+
+.action-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:18px;
+}
+
+.action-card h3{
+  margin:0 0 10px;
+  font-size:17px;
+}
+
+.action-card ul{
   margin:0;
   padding-left:18px;
   color:var(--soft);
@@ -451,11 +475,6 @@ button{
   .logo-text strong{font-size:21px}
   .logo-text span{font-size:11px}
 
-  .header-badge{
-    font-size:11px;
-    padding:7px 9px;
-  }
-
   .hero{
     padding:24px;
     border-radius:26px;
@@ -474,17 +493,17 @@ button{
     flex-direction:column;
   }
 
-  .grid{
+  .signal-strip{
     grid-template-columns:1fr 1fr;
   }
 
-  .card{
-    padding:16px;
-    border-radius:20px;
+  .signal-item{
+    padding:14px;
+    border-radius:18px;
   }
 
-  .card strong{
-    font-size:24px;
+  .signal-item strong{
+    font-size:21px;
   }
 
   .toolbar,
@@ -530,27 +549,17 @@ button{
     overflow:hidden;
   }
 
-  .score-badge{
-    align-self:flex-start;
-  }
-
-  .chart{
-    gap:6px;
-    min-height:110px;
-    overflow-x:auto;
-    padding-bottom:4px;
-  }
-
-  .bar-wrap{
-    min-width:48px;
-  }
-
-  .bar{
-    max-width:36px;
-  }
-
-  .report{
+  .graph-grid,
+  .action-grid{
     grid-template-columns:1fr;
+  }
+
+  .flow-chart{
+    height:140px;
+  }
+
+  .flow-labels{
+    font-size:10px;
   }
 }
 </style>
@@ -567,20 +576,19 @@ button{
         <span>태양광 산업 인텔리전스</span>
       </div>
     </div>
-    <div class="header-badge">네이버 · 구글</div>
   </header>
 
   <section class="hero">
     <h1>
-  태양광 산업의 흐름을 읽는<br>
-  가장 빠른 방법
-</h1>
+      태양광 산업의 흐름을 읽는<br>
+      가장 빠른 방법
+    </h1>
 
-<p>
-  정책 변화부터 REC/SMP, ESS, 계통 이슈까지
-  대표가 매일 확인해야 할 핵심 신호를
-  NOVENT Solar가 정리합니다.
-</p>
+    <p>
+      정책 변화부터 REC/SMP, ESS, 계통 이슈까지
+      매일 확인해야 할 핵심 신호를
+      NOVENT Solar가 정리합니다.
+    </p>
 
     <div class="signal-box" id="signalBox">
       <div class="signal-top">
@@ -591,29 +599,33 @@ button{
     </div>
   </section>
 
-  <section class="grid">
-    <div class="card">
+  <section class="signal-strip">
+    <div class="signal-item">
       <small>주요 뉴스</small>
       <strong id="totalCount">0</strong>
+      <span>선택 기간 내 핵심 기사</span>
     </div>
-    <div class="card">
+    <div class="signal-item">
       <small>정책 신호</small>
       <strong id="policyCount" class="up">0</strong>
+      <span>정부·제도 변화 감지</span>
     </div>
-    <div class="card">
+    <div class="signal-item">
       <small>시장 관심도</small>
       <strong id="marketScore" class="blue">0%</strong>
+      <span>기사 중요도 평균</span>
     </div>
-    <div class="card">
+    <div class="signal-item">
       <small>리스크 신호</small>
       <strong id="riskScore" class="down">0</strong>
+      <span>계통·화재·규제 이슈</span>
     </div>
   </section>
 
   <section class="panel">
     <div class="panel-title">
       <h2>산업 뉴스 분석</h2>
-      <span>Naver Main + Google Assist</span>
+      <span>최근 흐름 기준</span>
     </div>
 
     <div class="toolbar">
@@ -652,32 +664,48 @@ button{
 
   <section class="panel">
     <div class="panel-title">
-      <h2>키워드 관심도</h2>
-      <span>선택 기간 내 기사 언급량 기준</span>
+      <h2>산업 흐름 그래프</h2>
+      <span>선택 기간 기준</span>
     </div>
-    <div class="chart" id="chart"></div>
+
+    <div class="graph-grid">
+      <div class="chart-box">
+        <h3>키워드 관심도</h3>
+        <div class="keyword-bars" id="keywordBars"></div>
+      </div>
+
+      <div class="chart-box">
+        <h3>태양광 흐름</h3>
+        <svg class="flow-chart" id="flowChart" viewBox="0 0 720 170" preserveAspectRatio="none"></svg>
+        <div class="flow-labels" id="flowLabels"></div>
+        <div class="flow-summary" id="flowSummary">데이터를 분석 중입니다.</div>
+      </div>
+
+      <div class="chart-box">
+        <h3>카테고리 분포</h3>
+        <div class="category-bars" id="categoryBars"></div>
+      </div>
+
+      <div class="chart-box">
+        <h3>리스크 체크</h3>
+        <div class="flow-summary" id="riskSummary">데이터를 분석 중입니다.</div>
+      </div>
+    </div>
   </section>
 
-  <section class="panel">
-    <div class="panel-title">
-      <h2>대표용 요약 리포트</h2>
-      <span>자동 생성</span>
+  <section class="action-grid">
+    <div class="action-card">
+      <h3>오늘의 체크 포인트</h3>
+      <ul id="checkList">
+        <li>실제 뉴스 데이터를 분석 중입니다.</li>
+      </ul>
     </div>
 
-    <div class="report">
-      <div class="report-card">
-        <h3>오늘의 체크 포인트</h3>
-        <ul id="checkList">
-          <li>실제 뉴스 데이터를 분석 중입니다.</li>
-        </ul>
-      </div>
-
-      <div class="report-card">
-        <h3>영업·제안 활용 포인트</h3>
-        <ul id="salesList">
-          <li>정책, ESS, 리스크 신호를 기반으로 제안 포인트를 생성합니다.</li>
-        </ul>
-      </div>
+    <div class="action-card">
+      <h3>영업·제안 활용 포인트</h3>
+      <ul id="salesList">
+        <li>정책, ESS, 리스크 신호를 기반으로 제안 포인트를 생성합니다.</li>
+      </ul>
     </div>
   </section>
 
@@ -689,13 +717,12 @@ button{
 <script>
 let newsData = [];
 let currentSignal = null;
-let currentKeywords = [];
 
 async function loadNews(){
   const keyword = document.getElementById("searchInput").value.trim();
   const status = document.getElementById("status");
 
-  status.textContent = "네이버와 구글에서 실제 뉴스를 수집하고 분석 중입니다...";
+  status.textContent = "실제 뉴스를 수집하고 분석 중입니다...";
 
   try{
     const response = await fetch(`/api/news?q=${encodeURIComponent(keyword)}`);
@@ -707,18 +734,15 @@ async function loadNews(){
 
     newsData = data.articles || [];
     currentSignal = data.signal || null;
-    currentKeywords = data.keywords || [];
 
     renderSignal(currentSignal);
     render();
 
-    status.textContent =
-      `총 ${newsData.length}개 수집 · 네이버 ${data.naverCount || 0}개 · 구글 ${data.googleCount || 0}개`;
+    status.textContent = `총 ${newsData.length}개 산업 신호를 분석했습니다.`;
   }catch(error){
     status.textContent = "실제 뉴스를 불러오지 못했습니다. Vercel 배포 후 /api/news 경로와 환경변수를 확인해주세요.";
     newsData = [];
     currentSignal = null;
-    currentKeywords = [];
     renderSignal(null);
     render();
   }
@@ -752,7 +776,6 @@ function getMainNewsScore(item){
   const text = `${item.title || ""} ${item.summary || ""} ${item.insight || ""}`;
 
   if(item.sourceType === "naver") score += 8;
-
   if(/정책|산업부|보조금|지원사업|RPS|규제|고시/.test(text)) score += 12;
   if(/REC|SMP|전력시장|가격|수익|전력거래/.test(text)) score += 12;
   if(/ESS|배터리|저장|인버터|모듈|효율/.test(text)) score += 9;
@@ -762,7 +785,6 @@ function getMainNewsScore(item){
   const d = new Date(item.pubDate);
   if(!isNaN(d.getTime())){
     const days = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
-
     if(days <= 7) score += 10;
     else if(days <= 30) score += 6;
     else if(days <= 90) score += 2;
@@ -780,9 +802,8 @@ function getFilteredData(){
 
   if(periodValue !== "all"){
     const period = Number(periodValue);
-    const now = new Date();
     const fromDate = new Date();
-    fromDate.setDate(now.getDate() - period);
+    fromDate.setDate(new Date().getDate() - period);
 
     filtered = filtered.filter(item => {
       const d = new Date(item.pubDate);
@@ -811,8 +832,11 @@ function render(){
 
   renderStats(filtered);
   renderNews(filtered);
-  renderChart(filtered);
-  renderReport(filtered);
+  renderKeywordBars(filtered);
+  renderFlowChart(filtered);
+  renderCategoryBars(filtered);
+  renderRiskSummary(filtered);
+  renderActions(filtered);
 }
 
 function renderStats(data){
@@ -838,7 +862,6 @@ function renderNews(data){
           <h3>표시할 실제 뉴스가 없습니다</h3>
           <p>검색어, 기간, 카테고리를 변경해보세요.</p>
         </div>
-        <div class="score-badge normal">안내</div>
       </div>
     `;
     return;
@@ -852,78 +875,170 @@ function renderNews(data){
 
       <div>
         <h3>
-  <a class="headline-link"
-     href="${item.link}"
-     target="_blank"
-     rel="noopener">
-     ${escapeHtml(stripHtml(item.title))}
-  </a>
-
-  <span class="media-name">
-    ${escapeHtml(stripHtml(item.source))}
-  </span>
-</h3>
+          <a class="headline-link"
+             href="${item.link}"
+             target="_blank"
+             rel="noopener">
+            ${escapeHtml(stripHtml(item.title))}
+          </a>
+        </h3>
         <p>${escapeHtml(stripHtml(item.summary))}</p>
         <p><strong>대표 인사이트:</strong> ${escapeHtml(stripHtml(item.insight))}</p>
-        <p>${escapeHtml(stripHtml(item.source))} · ${formatDate(item.pubDate)}</p>
-        
-      </div>
-
-      <div class="score-badge ${getScoreClass(item.score)}">
-        ${getScoreLabel(item.score)}
+        <p>${formatDate(item.pubDate)}</p>
       </div>
     </article>
   `).join("");
 }
 
-function getScoreLabel(score){
-  const s = Number(score || 0);
-
-  if(s >= 85) return "핵심";
-  if(s >= 70) return "주요";
-  if(s >= 55) return "관심";
-
-  return "일반";
-}
-
-function getScoreClass(score){
-  const s = Number(score || 0);
-
-  if(s >= 85) return "high";
-  if(s >= 70) return "mid";
-  if(s >= 55) return "low";
-
-  return "normal";
-}
-
-function renderChart(data){
+function renderKeywordBars(data){
   const keywords = ["정책","REC","SMP","ESS","인버터","계통","리스크","투자"];
-
-  const chartData = keywords.map(keyword => {
+  const rows = keywords.map(keyword => {
     const count = data.filter(article => {
       const text = `${article.title || ""} ${article.summary || ""} ${article.insight || ""}`;
       return text.includes(keyword);
     }).length;
-
     return { keyword, count };
   });
 
-  const max = Math.max(...chartData.map(item => item.count), 1);
-  const chart = document.getElementById("chart");
+  const max = Math.max(...rows.map(r => r.count), 1);
 
-  chart.innerHTML = chartData.map(item => {
-    const height = Math.max(14, Math.round((item.count / max) * 96));
-
-    return `
-      <div class="bar-wrap">
-        <div class="bar" style="height:${height}px"></div>
-        <div class="bar-label">${escapeHtml(item.keyword)}</div>
+  document.getElementById("keywordBars").innerHTML = rows.map(row => `
+    <div class="keyword-row">
+      <span>${escapeHtml(row.keyword)}</span>
+      <div class="keyword-track">
+        <div class="keyword-fill" style="width:${Math.round((row.count / max) * 100)}%"></div>
       </div>
-    `;
-  }).join("");
+      <span>${row.count}</span>
+    </div>
+  `).join("");
 }
 
-function renderReport(data = getFilteredData()){
+function renderFlowChart(data){
+  const svg = document.getElementById("flowChart");
+  const labels = document.getElementById("flowLabels");
+  const summary = document.getElementById("flowSummary");
+
+  const buckets = makeFlowBuckets(data);
+  const max = Math.max(...buckets.map(b => b.value), 1);
+
+  const width = 720;
+  const height = 170;
+  const padX = 24;
+  const padY = 22;
+
+  const points = buckets.map((b, i) => {
+    const x = padX + (i * ((width - padX * 2) / Math.max(buckets.length - 1, 1)));
+    const y = height - padY - ((b.value / max) * (height - padY * 2));
+    return { x, y, ...b };
+  });
+
+  const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  const areaPath = `${path} L ${points[points.length - 1].x} ${height - padY} L ${points[0].x} ${height - padY} Z`;
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="flowFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="rgba(217,255,95,.26)" />
+        <stop offset="100%" stop-color="rgba(217,255,95,0)" />
+      </linearGradient>
+    </defs>
+    <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="rgba(255,255,255,.12)" stroke-width="1" />
+    <path d="${areaPath}" fill="url(#flowFill)" />
+    <path d="${path}" fill="none" stroke="#d9ff5f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    ${points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#d9ff5f" />`).join("")}
+  `;
+
+  labels.innerHTML = buckets.map(b => `<span>${b.label}</span>`).join("");
+
+  const first = buckets[0]?.value || 0;
+  const last = buckets[buckets.length - 1]?.value || 0;
+  const direction = last > first ? "상승" : last < first ? "하락" : "유지";
+
+  summary.innerHTML = `태양광 관련 기사 신호는 <strong>${direction}</strong> 흐름입니다. 최근 구간 ${last}건.`;
+}
+
+function makeFlowBuckets(data){
+  const periodValue = document.getElementById("periodFilter")?.value || "30";
+  const bucketCount = 6;
+  const now = new Date();
+
+  let days = 30;
+  if(periodValue === "90") days = 90;
+  if(periodValue === "365") days = 365;
+  if(periodValue === "all") days = 180;
+
+  const bucketSize = Math.ceil(days / bucketCount);
+  const buckets = Array.from({length:bucketCount}, (_, i) => {
+    const start = new Date();
+    start.setDate(now.getDate() - days + (i * bucketSize));
+
+    const end = new Date();
+    end.setDate(now.getDate() - days + ((i + 1) * bucketSize));
+
+    return {
+      start,
+      end,
+      value:0,
+      label: days >= 365 ? `${start.getMonth()+1}월` : `${start.getMonth()+1}/${start.getDate()}`
+    };
+  });
+
+  data.forEach(item => {
+    const d = new Date(item.pubDate);
+    if(isNaN(d.getTime())) return;
+
+    const target = buckets.find(b => d >= b.start && d < b.end);
+    if(target){
+      target.value += Math.max(1, Math.round(Number(item.score || 50) / 30));
+    }
+  });
+
+  return buckets;
+}
+
+function renderCategoryBars(data){
+  const categories = ["정책","시장","기술","리스크","일반"];
+  const rows = categories.map(category => ({
+    category,
+    count:data.filter(item => item.category === category).length
+  }));
+
+  const max = Math.max(...rows.map(r => r.count), 1);
+
+  document.getElementById("categoryBars").innerHTML = rows.map(row => `
+    <div class="category-row">
+      <span>${escapeHtml(row.category)}</span>
+      <div class="category-track">
+        <div class="category-fill" style="width:${Math.round((row.count / max) * 100)}%"></div>
+      </div>
+      <span>${row.count}</span>
+    </div>
+  `).join("");
+}
+
+function renderRiskSummary(data){
+  const risk = data.filter(item => item.category === "리스크").length;
+  const policy = data.filter(item => item.category === "정책").length;
+  const total = data.length || 1;
+  const riskRate = Math.round((risk / total) * 100);
+  const policyRate = Math.round((policy / total) * 100);
+
+  let text = "현재 뚜렷한 리스크 과열 신호는 낮습니다.";
+
+  if(riskRate >= 30){
+    text = "리스크성 기사가 높게 감지됩니다. 계통·화재·규제 이슈를 우선 점검하세요.";
+  }else if(policyRate >= 30){
+    text = "정책성 기사가 높게 감지됩니다. 지원사업·인허가·제도 변화를 확인하세요.";
+  }
+
+  document.getElementById("riskSummary").innerHTML = `
+    <p>리스크 비중 <strong>${riskRate}%</strong></p>
+    <p>정책 비중 <strong>${policyRate}%</strong></p>
+    <p>${escapeHtml(text)}</p>
+  `;
+}
+
+function renderActions(data = getFilteredData()){
   const checkList = document.getElementById("checkList");
   const salesList = document.getElementById("salesList");
 
