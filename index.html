@@ -866,7 +866,7 @@ function renderNews(data){
         <p>${escapeHtml(stripHtml(item.summary))}</p>
         <p><strong>대표 인사이트:</strong> ${escapeHtml(stripHtml(item.insight))}</p>
         <p>${escapeHtml(stripHtml(item.source))} · ${formatDate(item.pubDate)}</p>
-        <a href="${item.link}" target="_blank" rel="noopener">기사 보기</a>
+        
       </div>
 
       <div class="score-badge ${getScoreClass(item.score)}">
