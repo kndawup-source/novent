@@ -1,10 +1,3 @@
-import Parser from "rss-parser";
-
-const parser = new Parser();
-
-const NAVER_ID = process.env.NAVER_CLIENT_ID;
-const NAVER_SECRET = process.env.NAVER_CLIENT_SECRET;
-
 function stripHtml(str = ""){
   return String(str || "")
     .replace(/<[^>]*>/g, "")
@@ -51,146 +44,84 @@ function makeScore(text = ""){
   return Math.min(score, 98);
 }
 
-async function fetchNaverNews(query){
-  if(!NAVER_ID || !NAVER_SECRET){
-    return [];
-  }
-
-  const url =
-    `https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(query)}&display=30&sort=date`;
-
-  const response = await fetch(url,{
-    headers:{
-      "X-Naver-Client-Id": NAVER_ID,
-      "X-Naver-Client-Secret": NAVER_SECRET
-    }
-  });
-
-  if(!response.ok){
-    throw new Error("NAVER API ERROR");
-  }
-
-  const data = await response.json();
-
-  return (data.items || []).map(item => {
-    const title = stripHtml(item.title || "");
-    const description = stripHtml(item.description || "");
-    const text = `${title} ${description}`;
-
-    return {
-      sourceType:"naver",
-      title,
-      summary:description,
-      link:item.originallink || item.link,
-      pubDate:item.pubDate,
-      category:detectCategory(text),
-      score:makeScore(text)
-    };
-  });
-}
-
-async function fetchGoogleNews(query){
-  try{
-    const rssUrl =
-      `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=ko&gl=KR&ceid=KR:ko`;
-
-    const feed = await parser.parseURL(rssUrl);
-
-    return (feed.items || []).map(item => {
-      const title = stripHtml(item.title || "");
-      const text = title;
-
-      return {
-        sourceType:"google",
-        title,
-        summary:title,
-        link:item.link,
-        pubDate:item.pubDate,
-        category:detectCategory(text),
-        score:makeScore(text)
-      };
-    });
-  }catch(e){
-    return [];
-  }
-}
-
-async function fetchGlobalNews(){
-  try{
-    const rssUrl =
-      `https://news.google.com/rss/search?q=solar+industry+OR+photovoltaic+OR+energy+storage&hl=en-US&gl=US&ceid=US:en`;
-
-    const feed = await parser.parseURL(rssUrl);
-
-    return (feed.items || []).slice(0,20).map(item => {
-      const title = stripHtml(item.title || "");
-      const text = title;
-
-      return {
-        sourceType:"global",
-        title,
-        summary:title,
-        link:item.link,
-        pubDate:item.pubDate,
-        category:detectCategory(text),
-        score:makeScore(text)
-      };
-    });
-  }catch(e){
-    return [];
-  }
-}
-
 export default async function handler(req,res){
+
   try{
+
+    const NAVER_ID =
+      process.env.NAVER_CLIENT_ID;
+
+    const NAVER_SECRET =
+      process.env.NAVER_CLIENT_SECRET;
+
+    if(!NAVER_ID || !NAVER_SECRET){
+      return res.status(500).json({
+        ok:false,
+        message:"NAVER API KEY 없음"
+      });
+    }
+
     const q =
       req.query.q ||
       "태양광 OR 재생에너지 OR REC OR SMP OR ESS";
 
-    const [
-      naverNews,
-      googleNews,
-      globalNews
-    ] = await Promise.all([
-      fetchNaverNews(q),
-      fetchGoogleNews(q),
-      fetchGlobalNews()
-    ]);
+    const url =
+      `https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(q)}&display=50&sort=date`;
 
-    const merged = [
-      ...naverNews,
-      ...googleNews,
-      ...globalNews
-    ];
-
-    const unique = [];
-
-    const seen = new Set();
-
-    for(const item of merged){
-      const key = stripHtml(item.title).toLowerCase();
-
-      if(!seen.has(key)){
-        seen.add(key);
-        unique.push(item);
+    const response = await fetch(url,{
+      headers:{
+        "X-Naver-Client-Id": NAVER_ID,
+        "X-Naver-Client-Secret": NAVER_SECRET
       }
-    }
-
-    unique.sort((a,b)=>{
-      return new Date(b.pubDate) - new Date(a.pubDate);
     });
 
+    if(!response.ok){
+      return res.status(500).json({
+        ok:false,
+        message:"네이버 뉴스 호출 실패"
+      });
+    }
+
+    const data = await response.json();
+
+    const articles =
+      (data.items || []).map(item => {
+
+        const title =
+          stripHtml(item.title || "");
+
+        const summary =
+          stripHtml(item.description || "");
+
+        const text =
+          `${title} ${summary}`;
+
+        return {
+          sourceType:"naver",
+          title,
+          summary,
+          link:item.originallink || item.link,
+          pubDate:item.pubDate,
+          category:detectCategory(text),
+          score:makeScore(text)
+        };
+      });
+
     const avg =
-      unique.length
+      articles.length
         ? Math.round(
-            unique.reduce((sum,n)=>sum + Number(n.score || 0),0)
-            / unique.length
+            articles.reduce(
+              (sum,n)=>sum + Number(n.score || 0),
+              0
+            ) / articles.length
           )
         : 0;
 
     return res.status(200).json({
       ok:true,
-      articles:unique.slice(0,80),
+
+      articles,
+
       signal:{
         mood:
           avg >= 75
@@ -202,7 +133,7 @@ export default async function handler(req,res){
         avgScore:avg,
 
         summary:
-          "네이버 뉴스·Google News·해외 태양광 뉴스를 기반으로 산업 흐름을 분석했습니다."
+          "네이버 뉴스 기반으로 태양광 산업 흐름을 분석했습니다."
       }
     });
 
