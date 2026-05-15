@@ -88,8 +88,9 @@ async function fetchNaverNews(query) {
 
     return (data.items || []).map(item => {
       const title = clean(item.title);
-      const summary = clean(item.description);
-      const text = `${title} ${summary}`;
+      const originalSummary = clean(item.description);
+      const summary = makeReadableSummary(originalSummary, title, "Naver");
+      const text = `${title} ${originalSummary}`;
 
       return {
         sourceType: "naver",
@@ -142,7 +143,7 @@ async function fetchGoogleNews(query, period) {
       const summary = makeReadableSummary(rawDescription, title, source);
       const link = clean(getTag(item, "link"));
       const pubDate = clean(getTag(item, "pubDate"));
-      const text = `${title} ${summary}`;
+      const text = `${title} ${rawDescription}`;
 
       return {
         sourceType: "google",
@@ -195,7 +196,7 @@ async function fetchGlobalSolarNews(period) {
       const summary = makeReadableSummary(rawDescription, title, source);
       const link = clean(getTag(item, "link"));
       const pubDate = clean(getTag(item, "pubDate"));
-      const text = `${title} ${summary}`;
+      const text = `${title} ${rawDescription}`;
 
       return {
         sourceType: "global",
@@ -243,26 +244,45 @@ function clean(text = "") {
 }
 
 function makeReadableSummary(description = "", title = "", source = "") {
-  let text = clean(description);
+  const text = `${title} ${description} ${source}`.toLowerCase();
 
-  if (title) {
-    text = text.replace(title, "").trim();
+  if (/정책|산업부|보조금|지원사업|ira|policy|subsidy|tax credit/.test(text)) {
+    return "정책·지원사업 변화 흐름이 함께 언급되고 있습니다.";
   }
 
-  if (source) {
-    text = text.replace(source, "").trim();
+  if (/rec|smp|전력시장|가격|수익|market|price|investment|finance/.test(text)) {
+    return "REC/SMP 수익성과 시장 흐름 관련 관심이 확대되고 있습니다.";
   }
 
-  text = text
-    .replace(/^[-–—·|:]+/, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (text.length > 140) {
-    text = text.slice(0, 140) + "...";
+  if (/ess|배터리|저장|battery|storage|inverter|module/.test(text)) {
+    return "ESS·저장장치 및 전력 안정화 흐름이 언급되고 있습니다.";
   }
 
-  return text || "요약 정보가 없습니다.";
+  if (/계통|접속|지연|송전|grid|curtailment|delay/.test(text)) {
+    return "계통·접속 지연 및 송전 리스크 이슈가 포함되어 있습니다.";
+  }
+
+  if (/화재|고장|안전|risk|fire|safety|maintenance/.test(text)) {
+    return "안전·유지보수 및 운영 리스크 관련 흐름이 감지됩니다.";
+  }
+
+  if (/중국|china|공급망|폴리실리콘|longi|trina|jinko/.test(text)) {
+    return "중국 공급망 및 글로벌 원자재 흐름이 함께 언급되고 있습니다.";
+  }
+
+  if (/투자|금리|finance|investment|fund|capital/.test(text)) {
+    return "시장 투자심리 및 사업성 관련 흐름이 반영되고 있습니다.";
+  }
+
+  if (/유럽|europe|독일|germany|france/.test(text)) {
+    return "유럽 재생에너지 및 전력시장 흐름이 함께 반영되고 있습니다.";
+  }
+
+  if (/미국|usa|us|ira|tax credit/.test(text)) {
+    return "미국 IRA 및 태양광 투자 정책 흐름이 언급되고 있습니다.";
+  }
+
+  return "태양광 산업 흐름 참고용 주요 기사입니다.";
 }
 
 function detectCategory(text = "") {
