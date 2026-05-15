@@ -1,341 +1,216 @@
-export default async function handler(req, res) {
-  const query = req.query.q || "태양광 OR 재생에너지 OR REC OR SMP OR ESS";
-  const period = req.query.period || "30";
+import Parser from "rss-parser";
 
-  try {
-    const naverArticles = await fetchNaverNews(query, period);
-    const googleArticles = await fetchGoogleNews(query, period);
+const parser = new Parser();
 
-    const articles = removeDuplicates([
-      ...naverArticles,
-      ...googleArticles
-    ])
-      .map(article => ({
-        ...article,
-        finalScore: article.sourceType === "naver"
-          ? article.score + 8
-          : article.score
-      }))
-      .sort((a, b) => b.finalScore - a.finalScore)
-      .slice(0, getLimitByPeriod(period));
+const NAVER_ID = process.env.NAVER_CLIENT_ID;
+const NAVER_SECRET = process.env.NAVER_CLIENT_SECRET;
 
-    const signal = createMarketSignal(articles);
-    const keywords = createKeywordTrend(articles);
-
-    return res.status(200).json({
-      ok: true,
-      brand: "NOVENT Solar",
-      sourceMode: "naver-main-google-assist",
-      query,
-      period,
-      count: articles.length,
-      naverCount: naverArticles.length,
-      googleCount: googleArticles.length,
-      signal,
-      keywords,
-      articles
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      ok: false,
-      message: "뉴스 데이터를 불러오지 못했습니다.",
-      error: error.message
-    });
-  }
-}
-
-function getLimitByPeriod(period){
-  if(period === "30") return 80;
-  if(period === "90") return 160;
-  if(period === "365") return 260;
-  return 300;
-}
-
-function getNaverStarts(period){
-  if(period === "30") return [1];
-  if(period === "90") return [1, 101];
-  if(period === "365") return [1, 101, 201, 301];
-  return [1, 101, 201, 301, 401];
-}
-
-async function fetchNaverNews(query, period) {
-  if (!process.env.NAVER_CLIENT_ID || !process.env.NAVER_CLIENT_SECRET) {
-    return [];
-  }
-
-  const starts = getNaverStarts(period);
-  const all = [];
-
-  for (const start of starts) {
-    const url =
-      "https://openapi.naver.com/v1/search/news.json?" +
-      new URLSearchParams({
-        query,
-        display: "100",
-        start: String(start),
-        sort: "date"
-      });
-
-    const response = await fetch(url, {
-      headers: {
-        "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID,
-        "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET
-      }
-    });
-
-    if (!response.ok) continue;
-
-    const data = await response.json();
-
-    const items = (data.items || [])
-      .map(item => {
-        const title = clean(item.title);
-        const summary = clean(item.description);
-        const text = `${title} ${summary}`;
-
-        return {
-          sourceType: "naver",
-          source: "Naver",
-          title,
-          summary: summary || "요약 정보가 없습니다.",
-          link: item.originallink || item.link,
-          image: "",
-          pubDate: item.pubDate,
-          category: classify(text),
-          score: scoreArticle(text),
-          insight: makeInsight(text)
-        };
-      })
-      .filter(article => article.title && article.link);
-
-    all.push(...items);
-  }
-
-  return filterByPeriod(all, period);
-}
-
-async function fetchGoogleNews(query, period) {
-  const periodQuery = period === "all"
-    ? query
-    : `${query} when:${period}d`;
-
-  const rssUrl =
-    "https://news.google.com/rss/search?" +
-    new URLSearchParams({
-      q: periodQuery,
-      hl: "ko",
-      gl: "KR",
-      ceid: "KR:ko"
-    });
-
-  const response = await fetch(rssUrl);
-  if (!response.ok) return [];
-
-  const xml = await response.text();
-
-  const articles = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
-    .slice(0, 100)
-    .map(match => {
-      const item = match[1];
-
-      const title = clean(getTag(item, "title"));
-      const source = clean(getTag(item, "source")) || "Google News";
-      const rawDescription = getTag(item, "description");
-      const summary = makeReadableSummary(rawDescription, title, source);
-      const link = getTag(item, "link");
-      const pubDate = getTag(item, "pubDate");
-      const text = `${title} ${summary}`;
-
-      return {
-        sourceType: "google",
-        source,
-        title,
-        summary,
-        link,
-        image: "",
-        pubDate,
-        category: classify(text),
-        score: scoreArticle(text),
-        insight: makeInsight(text)
-      };
-    })
-    .filter(article => article.title && article.link);
-
-  return filterByPeriod(articles, period);
-}
-
-function filterByPeriod(articles, period){
-  if(period === "all") return articles;
-
-  const days = Number(period || 30);
-  const from = new Date();
-  from.setDate(from.getDate() - days);
-
-  return articles.filter(item => {
-    const d = new Date(item.pubDate);
-    if(isNaN(d.getTime())) return true;
-    return d >= from;
-  });
-}
-
-function getTag(xml, tag) {
-  const match = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
-  return match ? match[1].trim() : "";
-}
-
-function clean(text = "") {
-  let value = String(text);
-
-  for (let i = 0; i < 3; i++) {
-    value = value
-      .replace(/&nbsp;/g, " ")
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&apos;/g, "'")
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">");
-  }
-
-  return value
-    .replace(/<!\[CDATA\[|\]\]>/g, "")
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
-    .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
-    .replace(/<font\b[^>]*>(.*?)<\/font>/gi, " $1")
+function stripHtml(str = ""){
+  return String(str || "")
     .replace(/<[^>]*>/g, "")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function makeReadableSummary(description = "", title = "", source = "") {
-  let text = clean(description);
+function detectCategory(text = ""){
+  const value = text.toLowerCase();
 
-  if (title) text = text.replace(title, "").trim();
-  if (source) text = text.replace(source, "").trim();
-
-  text = text
-    .replace(/^[-–—·|:]+/, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if(text.length > 140){
-    text = text.slice(0, 140) + "...";
+  if(/정책|산업부|보조금|지원사업|rps|규제|고시/.test(value)){
+    return "정책";
   }
 
-  return text || "요약 정보가 없습니다.";
-}
+  if(/rec|smp|전력시장|가격|수익|전력거래/.test(value)){
+    return "시장";
+  }
 
-function classify(text) {
-  if (/정부|정책|산업부|보조금|입찰|RPS|공급의무|규제|고시|지원사업/.test(text)) return "정책";
-  if (/REC|SMP|가격|수익|투자|전력시장|전기요금|매출|금리|계약|전력거래/.test(text)) return "시장";
-  if (/ESS|인버터|배터리|모듈|효율|AI|기술|저장|솔루션|전력저장/.test(text)) return "기술";
-  if (/계통|지연|화재|고장|손실|부도|위험|리스크|민원|중단|폐업|안전/.test(text)) return "리스크";
+  if(/ess|배터리|인버터|모듈|효율|저장/.test(value)){
+    return "기술";
+  }
+
+  if(/계통|지연|화재|고장|민원|리스크|안전/.test(value)){
+    return "리스크";
+  }
+
   return "일반";
 }
 
-function scoreArticle(text) {
+function makeScore(text = ""){
   let score = 45;
 
-  [
-    "태양광","재생에너지","신재생","정책","산업부","보조금",
-    "REC","SMP","ESS","계통","전력시장","수익","투자",
-    "인버터","리스크","규제","지원사업","전력거래"
-  ].forEach(word => {
-    if (text.includes(word)) score += 4;
-  });
-
-  if (/계통|지연|화재|규제|손실|민원/.test(text)) score += 8;
-  if (/ESS|배터리|저장/.test(text)) score += 6;
-  if (/REC|SMP|전력시장|가격/.test(text)) score += 6;
-  if (/정부|산업부|정책|보조금|지원사업/.test(text)) score += 6;
+  if(/정책|산업부|보조금/.test(text)) score += 18;
+  if(/rec|smp|수익|전력시장/.test(text)) score += 15;
+  if(/ess|배터리|저장/.test(text)) score += 12;
+  if(/계통|리스크|화재/.test(text)) score += 15;
 
   return Math.min(score, 98);
 }
 
-function makeInsight(text) {
-  if (/계통|지연/.test(text)) return "신규 발전소 개발 일정과 계통 접속 가능성을 점검해야 합니다.";
-  if (/REC|SMP|가격|전력시장|전력거래/.test(text)) return "수익성 변동 가능성이 있어 REC/SMP 흐름과 계약 조건을 확인해야 합니다.";
-  if (/ESS|배터리|저장/.test(text)) return "ESS 연계 사업 또는 저장형 수익 모델 확장 기회로 볼 수 있습니다.";
-  if (/정부|정책|보조금|산업부|지원사업/.test(text)) return "정책 변화가 수주, 투자, 제안서 방향에 영향을 줄 수 있습니다.";
-  if (/화재|고장|리스크|손실|민원|안전/.test(text)) return "안전관리, 유지보수, 민원 대응 체계를 점검해야 합니다.";
-  return "시장 흐름 참고용 기사입니다. 관련 키워드의 반복 여부를 지켜볼 필요가 있습니다.";
-}
+async function fetchNaverNews(query){
+  if(!NAVER_ID || !NAVER_SECRET){
+    return [];
+  }
 
-function removeDuplicates(articles) {
-  const seen = new Set();
+  const url =
+    `https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(query)}&display=30&sort=date`;
 
-  return articles.filter(article => {
-    const key = normalizeKey(article.link || article.title);
-    if (!key) return false;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
+  const response = await fetch(url,{
+    headers:{
+      "X-Naver-Client-Id": NAVER_ID,
+      "X-Naver-Client-Secret": NAVER_SECRET
+    }
+  });
+
+  if(!response.ok){
+    throw new Error("NAVER API ERROR");
+  }
+
+  const data = await response.json();
+
+  return (data.items || []).map(item => {
+    const title = stripHtml(item.title || "");
+    const description = stripHtml(item.description || "");
+    const text = `${title} ${description}`;
+
+    return {
+      sourceType:"naver",
+      title,
+      summary:description,
+      link:item.originallink || item.link,
+      pubDate:item.pubDate,
+      category:detectCategory(text),
+      score:makeScore(text)
+    };
   });
 }
 
-function normalizeKey(value = "") {
-  return String(value)
-    .replace(/^https?:\/\//, "")
-    .replace(/[\?#].*$/, "")
-    .replace(/\s/g, "")
-    .replace(/[^\w가-힣/.-]/g, "")
-    .slice(0, 120);
+async function fetchGoogleNews(query){
+  try{
+    const rssUrl =
+      `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=ko&gl=KR&ceid=KR:ko`;
+
+    const feed = await parser.parseURL(rssUrl);
+
+    return (feed.items || []).map(item => {
+      const title = stripHtml(item.title || "");
+      const text = title;
+
+      return {
+        sourceType:"google",
+        title,
+        summary:title,
+        link:item.link,
+        pubDate:item.pubDate,
+        category:detectCategory(text),
+        score:makeScore(text)
+      };
+    });
+  }catch(e){
+    return [];
+  }
 }
 
-function createMarketSignal(articles) {
-  const policy = articles.filter(a => a.category === "정책").length;
-  const market = articles.filter(a => a.category === "시장").length;
-  const tech = articles.filter(a => a.category === "기술").length;
-  const risk = articles.filter(a => a.category === "리스크").length;
+async function fetchGlobalNews(){
+  try{
+    const rssUrl =
+      `https://news.google.com/rss/search?q=solar+industry+OR+photovoltaic+OR+energy+storage&hl=en-US&gl=US&ceid=US:en`;
 
-  const avgScore = articles.length
-    ? Math.round(articles.reduce((sum, a) => sum + Number(a.score || 0), 0) / articles.length)
-    : 0;
+    const feed = await parser.parseURL(rssUrl);
 
-  let mood = "관망";
+    return (feed.items || []).slice(0,20).map(item => {
+      const title = stripHtml(item.title || "");
+      const text = title;
 
-  if (risk >= 4 && risk >= policy + market) mood = "리스크 확대";
-  else if (avgScore >= 72 && policy + market + tech > risk) mood = "상승 관심";
-  else if (policy >= 4) mood = "정책 주시";
-
-  return {
-    mood,
-    avgScore,
-    policy,
-    market,
-    tech,
-    risk,
-    summary: makeSignalSummary(mood)
-  };
+      return {
+        sourceType:"global",
+        title,
+        summary:title,
+        link:item.link,
+        pubDate:item.pubDate,
+        category:detectCategory(text),
+        score:makeScore(text)
+      };
+    });
+  }catch(e){
+    return [];
+  }
 }
 
-function makeSignalSummary(mood) {
-  if (mood === "리스크 확대") {
-    return "계통, 규제, 안전 관련 리스크 신호가 커지고 있습니다. 신규 사업 일정과 유지보수 대응을 점검하세요.";
+export default async function handler(req,res){
+  try{
+    const q =
+      req.query.q ||
+      "태양광 OR 재생에너지 OR REC OR SMP OR ESS";
+
+    const [
+      naverNews,
+      googleNews,
+      globalNews
+    ] = await Promise.all([
+      fetchNaverNews(q),
+      fetchGoogleNews(q),
+      fetchGlobalNews()
+    ]);
+
+    const merged = [
+      ...naverNews,
+      ...googleNews,
+      ...globalNews
+    ];
+
+    const unique = [];
+
+    const seen = new Set();
+
+    for(const item of merged){
+      const key = stripHtml(item.title).toLowerCase();
+
+      if(!seen.has(key)){
+        seen.add(key);
+        unique.push(item);
+      }
+    }
+
+    unique.sort((a,b)=>{
+      return new Date(b.pubDate) - new Date(a.pubDate);
+    });
+
+    const avg =
+      unique.length
+        ? Math.round(
+            unique.reduce((sum,n)=>sum + Number(n.score || 0),0)
+            / unique.length
+          )
+        : 0;
+
+    return res.status(200).json({
+      ok:true,
+      articles:unique.slice(0,80),
+      signal:{
+        mood:
+          avg >= 75
+            ? "시장 관심 확대"
+            : avg >= 60
+            ? "관심 증가"
+            : "관망",
+
+        avgScore:avg,
+
+        summary:
+          "네이버 뉴스·Google News·해외 태양광 뉴스를 기반으로 산업 흐름을 분석했습니다."
+      }
+    });
+
+  }catch(error){
+
+    return res.status(500).json({
+      ok:false,
+      message:error.message
+    });
   }
-
-  if (mood === "상승 관심") {
-    return "정책, 시장, 기술 관련 관심도가 높습니다. 수주 제안, ESS 연계, 투자 자료로 활용할 수 있습니다.";
-  }
-
-  if (mood === "정책 주시") {
-    return "정책 관련 기사가 증가했습니다. 보조금, 인허가, RPS, 계통 관련 변화를 확인하세요.";
-  }
-
-  return "시장 흐름은 관망 구간입니다. REC, SMP, ESS, 계통 이슈를 지속적으로 확인하세요.";
-}
-
-function createKeywordTrend(articles) {
-  const keywords = ["정책", "REC", "SMP", "ESS", "인버터", "계통", "리스크", "투자"];
-
-  return keywords.map(keyword => {
-    const count = articles.filter(article => {
-      const text = `${article.title || ""} ${article.summary || ""} ${article.insight || ""}`;
-      return text.includes(keyword);
-    }).length;
-
-    return { keyword, count };
-  });
 }
