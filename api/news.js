@@ -1,7 +1,8 @@
 export default async function handler(req, res) {
   try {
-    const query = req.query.q || "태양광 OR 재생에너지 OR REC OR SMP OR ESS";
+    const query = req.query.q || "태양광 재생에너지 REC SMP ESS";
     const period = req.query.period || "30";
+    const debug = req.query.debug === "1";
 
     const [naverNews, googleNews, globalNews] = await Promise.all([
       fetchNaverNews(query),
@@ -14,18 +15,11 @@ export default async function handler(req, res) {
       ...googleNews,
       ...globalNews
     ])
-      .sort((a, b) => {
-        const da = new Date(a.pubDate).getTime() || 0;
-        const db = new Date(b.pubDate).getTime() || 0;
-        return db - da;
-      })
+      .sort((a, b) => (new Date(b.pubDate).getTime() || 0) - (new Date(a.pubDate).getTime() || 0))
       .slice(0, 100);
 
     const avgScore = articles.length
-      ? Math.round(
-          articles.reduce((sum, item) => sum + Number(item.score || 0), 0) /
-            articles.length
-        )
+      ? Math.round(articles.reduce((sum, item) => sum + Number(item.score || 0), 0) / articles.length)
       : 0;
 
     return res.status(200).json({
@@ -33,19 +27,22 @@ export default async function handler(req, res) {
       query,
       period,
       count: articles.length,
-      naverCount: naverNews.length,
-      googleCount: googleNews.length,
-      globalCount: globalNews.length,
+      ...(debug ? {
+        debug: {
+          naverCount: naverNews.length,
+          googleCount: googleNews.length,
+          globalCount: globalNews.length,
+          hasNaverId: Boolean(process.env.NAVER_CLIENT_ID),
+          hasNaverSecret: Boolean(process.env.NAVER_CLIENT_SECRET)
+        }
+      } : {}),
       articles,
       signal: {
-        mood:
-          avgScore >= 75
-            ? "시장 관심 확대"
-            : avgScore >= 60
-            ? "관심 증가"
-            : "관망",
+        mood: avgScore >= 75 ? "시장 관심 확대" : avgScore >= 60 ? "관심 증가" : "관망",
         avgScore,
-        summary: "뉴스 데이터를 기반으로 산업 흐름을 분석했습니다."
+        summary: articles.length
+          ? "뉴스 데이터를 기반으로 산업 흐름을 분석했습니다."
+          : "수집된 뉴스가 없습니다. API 키 또는 외부 뉴스 호출 상태를 확인해주세요."
       }
     });
   } catch (error) {
@@ -63,10 +60,15 @@ async function fetchNaverNews(query) {
   if (!NAVER_ID || !NAVER_SECRET) return [];
 
   try {
+    const naverQuery = String(query)
+      .replace(/\bOR\b/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
     const url =
       "https://openapi.naver.com/v1/search/news.json?" +
       new URLSearchParams({
-        query,
+        query: naverQuery || "태양광 재생에너지",
         display: "50",
         sort: "date"
       });
@@ -100,17 +102,22 @@ async function fetchNaverNews(query) {
         insight: makeInsight(text)
       };
     });
-  } catch (error) {
+  } catch {
     return [];
   }
 }
 
 async function fetchGoogleNews(query, period) {
   try {
+    const cleanQuery = String(query)
+      .replace(/\bOR\b/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
     const periodQuery =
       period && period !== "all"
-        ? `${query} when:${period}d`
-        : query;
+        ? `${cleanQuery || "태양광 재생에너지 REC SMP ESS"} when:${period}d`
+        : cleanQuery || "태양광 재생에너지 REC SMP ESS";
 
     const url =
       "https://news.google.com/rss/search?" +
@@ -121,7 +128,12 @@ async function fetchGoogleNews(query, period) {
         ceid: "KR:ko"
       });
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+
     if (!response.ok) return [];
 
     const xml = await response.text();
@@ -129,7 +141,6 @@ async function fetchGoogleNews(query, period) {
 
     return items.slice(0, 50).map(match => {
       const item = match[1];
-
       const title = clean(getTag(item, "title"));
       const source = clean(getTag(item, "source")) || "Google News";
       const rawSummary = clean(getTag(item, "description"));
@@ -150,7 +161,7 @@ async function fetchGoogleNews(query, period) {
         insight: makeInsight(text)
       };
     });
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -159,8 +170,8 @@ async function fetchGlobalSolarNews(period) {
   try {
     const query =
       period && period !== "all"
-        ? `solar industry OR photovoltaic OR energy storage when:${period}d`
-        : "solar industry OR photovoltaic OR energy storage";
+        ? `solar photovoltaic energy storage solar industry when:${period}d`
+        : "solar photovoltaic energy storage solar industry";
 
     const url =
       "https://news.google.com/rss/search?" +
@@ -171,7 +182,12 @@ async function fetchGlobalSolarNews(period) {
         ceid: "US:en"
       });
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+
     if (!response.ok) return [];
 
     const xml = await response.text();
@@ -179,7 +195,6 @@ async function fetchGlobalSolarNews(period) {
 
     return items.slice(0, 30).map(match => {
       const item = match[1];
-
       const title = clean(getTag(item, "title"));
       const source = clean(getTag(item, "source")) || "Global News";
       const rawSummary = clean(getTag(item, "description"));
@@ -200,7 +215,7 @@ async function fetchGlobalSolarNews(period) {
         insight: makeInsight(text)
       };
     });
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -268,21 +283,10 @@ function makeReadableSummary(description = "", title = "", source = "") {
 function detectCategory(text = "") {
   const value = String(text).toLowerCase();
 
-  if (/정책|산업부|보조금|지원사업|rps|규제|고시|정부|policy|subsidy|ira|tax credit/.test(value)) {
-    return "정책";
-  }
-
-  if (/rec|smp|전력시장|가격|수익|전력거래|market|price|investment|finance/.test(value)) {
-    return "시장";
-  }
-
-  if (/ess|배터리|인버터|모듈|효율|저장|battery|storage|module|inverter|technology/.test(value)) {
-    return "기술";
-  }
-
-  if (/계통|지연|화재|고장|민원|리스크|안전|grid|delay|fire|risk|safety|curtailment/.test(value)) {
-    return "리스크";
-  }
+  if (/정책|산업부|보조금|지원사업|rps|규제|고시|정부|policy|subsidy|ira|tax credit/.test(value)) return "정책";
+  if (/rec|smp|전력시장|가격|수익|전력거래|market|price|investment|finance/.test(value)) return "시장";
+  if (/ess|배터리|인버터|모듈|효율|저장|battery|storage|module|inverter|technology/.test(value)) return "기술";
+  if (/계통|지연|화재|고장|민원|리스크|안전|grid|delay|fire|risk|safety|curtailment/.test(value)) return "리스크";
 
   return "일반";
 }
@@ -303,25 +307,11 @@ function makeScore(text = "") {
 function makeInsight(text = "") {
   const value = String(text).toLowerCase();
 
-  if (/계통|접속|지연|grid|curtailment/.test(value)) {
-    return "계통 접속 가능성과 사업 일정 리스크를 함께 점검해야 합니다.";
-  }
-
-  if (/rec|smp|가격|수익|market|price/.test(value)) {
-    return "수익성 변동 가능성이 있어 REC/SMP 흐름과 계약 조건 확인이 필요합니다.";
-  }
-
-  if (/ess|배터리|저장|battery|storage/.test(value)) {
-    return "ESS 연계 사업 또는 전력 안정화 제안 포인트로 활용할 수 있습니다.";
-  }
-
-  if (/정책|산업부|보조금|policy|subsidy|ira/.test(value)) {
-    return "정책 변화가 수주, 투자, 제안서 방향에 영향을 줄 수 있습니다.";
-  }
-
-  if (/화재|고장|안전|risk|fire|safety/.test(value)) {
-    return "안전관리, 유지보수, 사후관리 체계 점검이 필요합니다.";
-  }
+  if (/계통|접속|지연|grid|curtailment/.test(value)) return "계통 접속 가능성과 사업 일정 리스크를 함께 점검해야 합니다.";
+  if (/rec|smp|가격|수익|market|price/.test(value)) return "수익성 변동 가능성이 있어 REC/SMP 흐름과 계약 조건 확인이 필요합니다.";
+  if (/ess|배터리|저장|battery|storage/.test(value)) return "ESS 연계 사업 또는 전력 안정화 제안 포인트로 활용할 수 있습니다.";
+  if (/정책|산업부|보조금|policy|subsidy|ira/.test(value)) return "정책 변화가 수주, 투자, 제안서 방향에 영향을 줄 수 있습니다.";
+  if (/화재|고장|안전|risk|fire|safety/.test(value)) return "안전관리, 유지보수, 사후관리 체계 점검이 필요합니다.";
 
   return "시장 흐름 참고용 기사입니다. 관련 키워드의 반복 여부를 확인하세요.";
 }
