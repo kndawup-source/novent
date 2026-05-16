@@ -20,8 +20,8 @@
   --accent2:#73ff9c;
   --accentSoft:rgba(217,255,95,.13);
   --accentLine:rgba(217,255,95,.28);
-  --red:#ff7b7b;
-  --blue:#8ecbff;
+  --red:#ff5f5f;
+  --blue:#5fa8ff;
   --shadow:0 26px 80px rgba(0,0,0,.34);
 }
 
@@ -37,6 +37,7 @@ html,body{
 
 button,input,select{font-family:inherit}
 button{cursor:pointer}
+
 .app{max-width:1180px;margin:0 auto;padding:24px}
 
 .header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
@@ -64,14 +65,18 @@ button{cursor:pointer}
 .hero-signal{
   margin-top:24px;
   display:grid;
-  grid-template-columns:180px 1fr;
-  gap:14px;
+  grid-template-columns:140px minmax(0,1fr);
+  gap:12px;
+  align-items:stretch;
 }
 .hero-score{
   background:rgba(217,255,95,.08);
   border:1px solid var(--accentLine);
-  border-radius:24px;
-  padding:18px;
+  border-radius:22px;
+  padding:16px 14px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
 }
 .hero-score span{
   display:block;
@@ -81,16 +86,17 @@ button{cursor:pointer}
 }
 .hero-score strong{
   display:block;
-  margin-top:10px;
-  font-size:38px;
-  letter-spacing:-1.5px;
+  margin-top:8px;
+  font-size:30px;
+  letter-spacing:-1px;
+  line-height:1;
   color:var(--accent);
 }
 .hero-summary{
   background:rgba(255,255,255,.03);
   border:1px solid rgba(255,255,255,.05);
-  border-radius:24px;
-  padding:18px;
+  border-radius:22px;
+  padding:16px;
   color:var(--soft);
   line-height:1.6;
   font-size:14px;
@@ -137,6 +143,16 @@ button{cursor:pointer}
   display:block;margin-top:6px;color:var(--soft);font-size:12px;line-height:1.35;
 }
 
+.stock-card.up,
+.stock-card.up .stock-change{
+  color:var(--red);
+}
+
+.stock-card.down,
+.stock-card.down .stock-change{
+  color:var(--blue);
+}
+
 .stock-price{font-size:24px!important}
 .stock-change{margin-top:6px;font-size:13px;font-weight:950}
 .stock-note{margin-top:7px;color:var(--soft);font-size:12px;line-height:1.4}
@@ -162,7 +178,7 @@ button{cursor:pointer}
 
 .up{color:var(--accent)}
 .down{color:var(--red)}
-.blue{color:var(--blue)}
+.blue{color:#8ecbff}
 
 .panel{
   border-radius:28px;
@@ -221,16 +237,15 @@ button{
 }
 .chart-box h3{margin:0 0 12px;font-size:16px}
 
-.keyword-bars,.global-list{display:grid;gap:10px}
-.keyword-row,.global-row{
+.keyword-bars{display:grid;gap:10px}
+.keyword-row{
   display:grid;grid-template-columns:72px 1fr 34px;align-items:center;gap:10px;
   color:var(--soft);font-size:12px;font-weight:900;
 }
-.global-row{grid-template-columns:72px 1fr 42px}
-.keyword-track,.global-track{
+.keyword-track{
   height:9px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;
 }
-.keyword-fill,.global-fill{
+.keyword-fill{
   height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2));
 }
 
@@ -257,14 +272,6 @@ button{
 }
 .interest-chart{width:180px;height:180px}
 .interest-bg{fill:none;stroke:rgba(255,255,255,.07);stroke-width:10}
-.interest-ring{
-  fill:none;
-  stroke:var(--accent);
-  stroke-width:10;
-  stroke-linecap:round;
-  transform:rotate(-90deg);
-  transform-origin:50% 50%;
-}
 .interest-center{
   font-size:7px;
   font-weight:950;
@@ -287,7 +294,7 @@ button{
   font-weight:900;
 }
 .interest-track{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
-.interest-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--accent))}
+.interest-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#8ecbff,var(--accent))}
 
 .world-map{
   position:relative;
@@ -305,7 +312,7 @@ button{
   inset:0;
   width:100%;
   height:100%;
-  opacity:.36;
+  opacity:1;
 }
 .city-dot{
   position:absolute;
@@ -324,9 +331,7 @@ button{
   font-weight:900;
   white-space:nowrap;
 }
-.city-score{
-  color:var(--accent);
-}
+.city-score{color:var(--accent)}
 
 .report-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
 .report-card{
@@ -398,8 +403,16 @@ button{
   .hero{padding:24px;border-radius:26px}
   .hero h1{font-size:28px;letter-spacing:-1.2px}
   .hero p{font-size:14px}
-  .hero-signal{grid-template-columns:1fr}
-  .hero-score strong{font-size:32px}
+  .hero-signal{
+    grid-template-columns:110px 1fr;
+    gap:10px;
+  }
+  .hero-score{
+    padding:14px 12px;
+  }
+  .hero-score strong{
+    font-size:24px;
+  }
   .stock-strip{grid-template-columns:1fr}
   .stock-more{grid-template-columns:1fr}
   .signal-strip{grid-template-columns:1fr 1fr}
@@ -486,7 +499,7 @@ button{
   <div class="graph-grid">
     <div class="chart-box">
       <h3>태양광 흐름</h3>
-      <svg class="flow-chart" id="flowChart" viewBox="0 0 720 170" preserveAspectRatio="none"></svg>
+      <svg class="flow-chart" id="flowChart" viewBox="0 0 720 170" preserveAspectRatio="xMidYMid meet"></svg>
       <div class="flow-labels" id="flowLabels"></div>
       <div class="flow-summary" id="flowSummary">데이터를 분석 중입니다.</div>
     </div>
@@ -652,12 +665,13 @@ function renderStocks(items){
   const renderOne = item => {
     const up = item.direction === "up";
     const isKRStock = item.symbol?.includes(".KS") || item.symbol?.includes(".KQ");
+    const isIndex = item.symbol?.startsWith("^") || item.symbol?.includes(".SS");
 
     return `
       <div class="stock-card ${up ? "up" : "down"}">
         <small>${flag(item)} ${escapeHtml(item.group)} · ${escapeHtml(item.name)}</small>
         <strong class="stock-price">
-          ${Number(item.price || 0).toLocaleString()}${isKRStock ? "원" : ""}
+          ${Number(item.price || 0).toLocaleString()}${isKRStock && !isIndex ? "원" : ""}
         </strong>
         <div class="stock-change">
           ${up ? "▲" : "▼"} ${Math.abs(Number(item.percent || 0)).toFixed(2)}%
@@ -1021,31 +1035,57 @@ function renderInterestChart(data){
   const chart = document.getElementById("interestChart");
   const list = document.getElementById("interestList");
 
-  const categories = ["정책","시장","기술","리스크","일반"];
+  const categories = [
+    { key:"정책", color:"#d9ff5f" },
+    { key:"시장", color:"#8ecbff" },
+    { key:"기술", color:"#73ff9c" },
+    { key:"리스크", color:"#ff7b7b" },
+    { key:"일반", color:"#7b8a80" }
+  ];
+
   const total = Math.max(data.length, 1);
 
-  const rows = categories.map(key => ({
-    key,
-    count:data.filter(item => item.category === key).length
+  const rows = categories.map(item => ({
+    ...item,
+    count:data.filter(article => article.category === item.key).length
   }));
 
-  const top = [...rows].sort((a,b)=>b.count-a.count)[0] || rows[0];
-  const percent = Math.round((top.count / total) * 100);
-
-  const radius = 38;
+  let start = 0;
+  const radius = 34;
   const circumference = 2 * Math.PI * radius;
-  const dash = circumference * percent / 100;
 
   chart.innerHTML = `
     <circle class="interest-bg" cx="50" cy="50" r="${radius}"></circle>
-    <circle class="interest-ring" cx="50" cy="50" r="${radius}"
-      stroke-dasharray="${dash} ${circumference - dash}">
-    </circle>
-    <text x="50" y="49" class="interest-center">${escapeHtml(top.key)}</text>
-    <text x="50" y="58" class="interest-sub">${percent}%</text>
+    ${
+      rows.map(row => {
+        const value = row.count / total;
+        const dash = value * circumference;
+        const gap = circumference - dash;
+
+        const circle = `
+          <circle
+            cx="50"
+            cy="50"
+            r="${radius}"
+            fill="none"
+            stroke="${row.color}"
+            stroke-width="10"
+            stroke-dasharray="${dash} ${gap}"
+            stroke-dashoffset="${-start}"
+            stroke-linecap="round"
+            transform="rotate(-90 50 50)">
+          </circle>
+        `;
+
+        start += dash;
+        return circle;
+      }).join("")
+    }
+    <text x="50" y="49" class="interest-center">분포</text>
+    <text x="50" y="58" class="interest-sub">${data.length}건</text>
   `;
 
-  const max = Math.max(...rows.map(r=>r.count),1);
+  const max = Math.max(...rows.map(r => r.count), 1);
 
   list.innerHTML = rows.map(row => `
     <div class="interest-item">
@@ -1083,9 +1123,13 @@ function renderWorldMap(){
   });
 
   document.getElementById("worldMap").innerHTML = `
-    <svg viewBox="0 0 1000 500" preserveAspectRatio="none">
-      <path d="M70 180 C160 130 250 150 320 190 C380 225 440 200 510 160 C620 95 720 140 800 190 C875 235 930 220 980 180 L980 500 L70 500 Z" fill="rgba(255,255,255,.06)"/>
-      <path d="M80 290 C170 250 280 270 350 310 C430 360 540 320 610 275 C700 215 820 250 930 305 L930 500 L80 500 Z" fill="rgba(255,255,255,.035)"/>
+    <svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
+      <path d="M135 155 L190 135 L245 155 L280 190 L250 230 L185 225 L130 200 Z" fill="rgba(255,255,255,.08)"/>
+      <path d="M250 250 L315 255 L345 300 L320 365 L270 340 L240 290 Z" fill="rgba(255,255,255,.07)"/>
+      <path d="M455 150 L525 135 L585 165 L575 215 L500 225 L450 195 Z" fill="rgba(255,255,255,.08)"/>
+      <path d="M520 230 L575 245 L595 330 L560 410 L505 345 Z" fill="rgba(255,255,255,.07)"/>
+      <path d="M610 150 L720 125 L835 165 L875 235 L790 260 L690 230 L600 200 Z" fill="rgba(255,255,255,.08)"/>
+      <path d="M775 315 L850 335 L880 390 L815 410 L760 370 Z" fill="rgba(255,255,255,.07)"/>
     </svg>
     ${rows.map(row => `
       <div class="city-dot" style="left:${row.x}%;top:${row.y}%"></div>
