@@ -871,7 +871,7 @@ function renderStocks(items){
 
     return `
       <div class="stock-card ${up ? "up" : "down"}">
-        <small>${flag(item)} ${escapeHtml(item.group)} · ${escapeHtml(item.name)}</small>
+        <small><small>${flag(item)} ${escapeHtml(item.name)}</small>
         <strong class="stock-price">${currency === "$" ? "$" : ""}${Number(item.price || 0).toLocaleString()}${currency === "원" ? "원" : currency === "¥" ? "¥" : ""}</strong>
         <div class="stock-change">${up ? "▲" : "▼"} ${Math.abs(Number(item.percent || 0)).toFixed(2)}%</div>
         <span class="stock-note">${escapeHtml(item.note || "시장 흐름 참고")}</span>
