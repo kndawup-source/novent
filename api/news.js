@@ -97,26 +97,26 @@ function toGlobalQuery(query = "") {
   const raw = String(query || "").toLowerCase();
 
   if (/엔터|kpop|케이팝|k팝|하이브|에스엠|음원|콘서트|팬덤|sm|yg|jyp/.test(raw)) {
-    return `"K-pop" OR "Korean entertainment" OR "music streaming" OR "concert tour" OR fandom OR HYBE OR "SM Entertainment" OR "JYP Entertainment" OR "YG Entertainment"`;
+    return "kpop";
   }
 
   if (/반도체|hbm|ai칩|파운드리|메모리|삼성전자|하이닉스/.test(raw)) {
-    return `semiconductor OR HBM OR "AI chip" OR foundry OR "memory chip" OR NVIDIA OR TSMC OR "Samsung Electronics" OR "SK Hynix"`;
+    return "semiconductor";
   }
 
   if (/ai|인공지능|llm|생성형|openai|anthropic|gpu/.test(raw)) {
-    return `"artificial intelligence" OR "generative AI" OR LLM OR OpenAI OR Anthropic OR GPU OR "AI agents"`;
+    return "artificial intelligence";
   }
 
   if (/전기차|배터리|자율주행|로보택시|테슬라|현대차|mobility/.test(raw)) {
-    return `"electric vehicle" OR "EV battery" OR "autonomous driving" OR robotaxi OR Tesla OR "mobility industry"`;
+    return "electric vehicle";
   }
 
   if (/태양광|재생에너지|rec|smp|ess|solar/.test(raw)) {
-    return `"solar industry" OR photovoltaic OR "renewable energy" OR "energy storage" OR "solar supply chain"`;
+    return "solar industry";
   }
 
-  return query;
+  return "global industry";
 }
 
 function expandQueries(query = "") {
@@ -321,15 +321,10 @@ async function fetchGlobalNews(query, period) {
   try {
     const globalQuery = toGlobalQuery(query);
 
-    const periodQuery =
-      period && period !== "all"
-        ? `${globalQuery} when:${period}d`
-        : globalQuery;
-
     const url =
       "https://news.google.com/rss/search?" +
       new URLSearchParams({
-        q: periodQuery,
+        q: globalQuery,
         hl: "en-US",
         gl: "US",
         ceid: "US:en"
@@ -344,9 +339,14 @@ async function fetchGlobalNews(query, period) {
     if (!response.ok) return [];
 
     const xml = await response.text();
+
+    if (!xml || !xml.includes("<item>")) {
+      return [];
+    }
+
     const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
 
-    return items.slice(0, 40).map(match => {
+    return items.slice(0, 25).map(match => {
       const item = match[1];
 
       const title = clean(getTag(item, "title"));
@@ -369,11 +369,11 @@ async function fetchGlobalNews(query, period) {
         insight: makeInsight(text)
       };
     });
-  } catch {
+  } catch (error) {
+    console.error("GLOBAL NEWS ERROR:", error);
     return [];
   }
 }
-
 function getTag(xml, tag) {
   const match = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
   return match ? match[1].trim() : "";
