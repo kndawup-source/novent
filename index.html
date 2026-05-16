@@ -199,7 +199,17 @@ button{cursor:pointer}
     radial-gradient(circle at top right, rgba(217,255,95,.06), transparent 32%),
     var(--panel2);
 }
-.chart-box h3{margin:0 0 12px;font-size:16px}
+.chart-box h3{
+  margin:0 0 12px;
+  font-size:16px;
+}
+
+.chart-box h3 small{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  margin-left:4px;
+}
 
 .toolbar{
   display:grid;
@@ -510,7 +520,7 @@ button{
   </div>
 
   <div class="chart-box">
-    <h3>키워드 관심도</h3>
+    <h3>키워드 관심도 <small>최근 30일</small></h3>
     <div class="keyword-bars" id="keywordBars"></div>
   </div>
 
@@ -784,13 +794,36 @@ function getFilteredData(){
 
   return filtered.slice(0,50);
 }
+function getKeywordTrendData(){
+  const category = document.getElementById("categoryFilter").value;
 
+  const fromDate = new Date();
+  fromDate.setDate(new Date().getDate() - 30);
+
+  let filtered = [...newsData].filter(item => {
+    const d = new Date(item.pubDate);
+
+    if(isNaN(d.getTime())){
+      return true;
+    }
+
+    return d >= fromDate;
+  });
+
+  if(category !== "all"){
+    filtered = filtered.filter(item => item.category === category);
+  }
+
+  return filtered;
+}
 function render(){
   const filtered = getFilteredData();
 
+  const keywordData = getKeywordTrendData();
+
   renderStats(filtered);
   renderNews(filtered);
-  renderKeywordBars(filtered);
+  renderKeywordBars(keywordData);
   renderFlowChart(filtered);
   renderInterestChart(filtered);
   renderSolarBoard();
