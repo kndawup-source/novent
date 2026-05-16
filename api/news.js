@@ -94,23 +94,77 @@ function getNewsProfile(industry, topic = "") {
     solar: {
       label: "태양광",
       include: [
-        "태양광", "재생에너지", "신재생", "REC", "SMP", "ESS", "전력시장", "계통",
-        "solar", "photovoltaic", "renewable", "energy storage"
+        "태양광",
+        "태양광 발전",
+        "태양광 모듈",
+        "태양광 인버터",
+        "태양광 설치",
+        "태양광 사업",
+        "태양광 발전소",
+        "태양광 정책",
+        "태양광 시장",
+        "solar",
+        "photovoltaic",
+        "solar module",
+        "solar farm",
+        "solar installation",
+        "solar energy"
       ],
-      exclude: [],
+      exclude: [
+        "풍력",
+        "원자력",
+        "원전",
+        "수소",
+        "바이오",
+        "석유",
+        "가스",
+        "wind power",
+        "nuclear",
+        "hydrogen",
+        "biofuel",
+        "oil",
+        "gas"
+      ],
       topicMap: {
-        solar: ["태양광", "재생에너지", "REC", "SMP", "ESS"],
-        solar_policy: ["태양광 정책", "재생에너지 정책", "신재생 보조금", "산업부 태양광"],
-        solar_market: ["REC", "SMP", "전력시장", "태양광 수익"],
-        solar_tech: ["ESS", "태양광 인버터", "태양광 모듈", "전력저장"],
-        solar_risk: ["계통 접속", "태양광 화재", "접속지연", "태양광 민원"]
+        solar: [
+          "태양광",
+          "태양광 발전",
+          "태양광 모듈",
+          "태양광 인버터",
+          "태양광 발전소"
+        ],
+        solar_policy: [
+          "태양광 정책",
+          "태양광 보조금",
+          "태양광 REC",
+          "태양광 SMP"
+        ],
+        solar_market: [
+          "태양광 시장",
+          "태양광 수익",
+          "태양광 투자",
+          "태양광 공급망"
+        ],
+        solar_tech: [
+          "태양광 모듈",
+          "태양광 인버터",
+          "태양광 효율",
+          "태양광 ESS"
+        ],
+        solar_risk: [
+          "태양광 화재",
+          "태양광 민원",
+          "태양광 규제",
+          "태양광 안전"
+        ]
       },
       global: [
         "solar industry",
         "photovoltaic",
-        "renewable energy",
-        "energy storage",
-        "solar supply chain"
+        "solar module",
+        "solar farm",
+        "solar installation",
+        "solar energy"
       ]
     },
 
@@ -385,8 +439,6 @@ function isRelevantToIndustry(item, profile) {
 
   if (excludeHit) return false;
 
-  // Google News를 이미 산업별 검색어로 호출했기 때문에
-  // 해외 기사는 과도하게 필터링하지 않음
   if (item.sourceType === "global") {
     return true;
   }
