@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   try {
     const query = req.query.q || "태양광 재생에너지 REC SMP ESS";
-    const period = req.query.period || "30";
+    const period = req.query.period || "90";
     const debug = req.query.debug === "1";
 
     const [naverNews, googleNews, globalNews] = await Promise.all([
