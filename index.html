@@ -19,14 +19,13 @@
 }
 html,body{
   margin:0;
-  background:radial-gradient(circle at top right,rgba(217,255,95,.08),transparent 24%),
-  radial-gradient(circle at bottom left,rgba(115,255,156,.05),transparent 20%),var(--bg);
+  background:var(--bg);
   color:var(--text);
   font-family:'Inter',-apple-system,BlinkMacSystemFont,"Noto Sans KR","Apple SD Gothic Neo",sans-serif;
 }
 button,input,select{font-family:inherit}
 button{cursor:pointer}
-.app{max-width:1180px;margin:0 auto;padding:34px 24px 24px}
+.app{max-width:1180px;margin:0 auto;padding:38px 24px 24px}
 .header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
 .brand{display:flex;align-items:center;gap:10px}
 .logo-mark{width:38px;height:38px;flex:0 0 38px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 12px 34px rgba(217,255,95,.22)}
@@ -34,15 +33,17 @@ button{cursor:pointer}
 .logo-text strong{font-family:'Syne',sans-serif;font-size:24px;line-height:1;letter-spacing:-1.2px;font-weight:800}
 .logo-text span{color:rgba(255,255,255,.54);font-size:10px;line-height:1.1;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
 
-.industry-tabs{display:flex;gap:8px;overflow-x:auto;margin:0 0 18px;padding-bottom:4px}
+.industry-tabs{
+  display:flex;gap:8px;overflow-x:auto;margin:0 0 18px;padding-bottom:4px;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.industry-tabs::-webkit-scrollbar{display:none}
 .industry-tabs button{
   flex:0 0 auto;width:auto;padding:10px 13px;border-radius:999px;
   background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
   color:var(--soft);font-size:12px;font-weight:900;
 }
-.industry-tabs button.active{
-  background:var(--accentSoft);border-color:var(--accentLine);color:var(--accent);
-}
+.industry-tabs button.active{background:var(--accentSoft);border-color:var(--accentLine);color:var(--accent)}
 
 .hero{
   background:radial-gradient(circle at 85% 15%,rgba(217,255,95,.18),transparent 28%),
@@ -66,31 +67,28 @@ button{cursor:pointer}
   border-radius:22px;
 }
 .stock-strip,.signal-strip{display:grid;gap:10px;margin:18px 0}
-.stock-strip{grid-template-columns:repeat(3,1fr)}
+.stock-strip{grid-template-columns:repeat(4,1fr)}
 .signal-strip{grid-template-columns:repeat(4,1fr)}
 .stock-card,.signal-item{padding:16px}
 .stock-card small,.signal-item small{display:block;color:var(--muted);font-size:12px;font-weight:900;margin-bottom:8px}
-.stock-card strong,.signal-item strong{display:block;font-size:24px;font-weight:950;letter-spacing:-.7px}
+.stock-card strong,.signal-item strong{display:block;font-size:22px;font-weight:950;letter-spacing:-.7px}
 .stock-card span,.signal-item span{display:block;margin-top:6px;color:var(--soft);font-size:12px;line-height:1.35}
 .stock-card.up,.stock-card.up .stock-change{color:var(--red)}
 .stock-card.down,.stock-card.down .stock-change{color:var(--blue)}
-.stock-price{font-size:24px!important}
+.stock-price{font-size:22px!important}
 .stock-change{margin-top:6px;font-size:13px;font-weight:950}
 .stock-note{margin-top:7px;color:var(--soft)!important;font-size:12px;line-height:1.4}
 .stock-more,.more-news{display:none;gap:10px}
 .stock-more.open,.more-news.open{display:grid}
-.stock-more{grid-column:1 / -1;grid-template-columns:repeat(3,1fr)}
+.stock-more{grid-column:1 / -1;grid-template-columns:repeat(4,1fr)}
 .stock-more-btn,.more-btn{grid-column:1 / -1;margin-top:2px}
 
 .up{color:var(--accent)}.down{color:var(--red)}.blue{color:#8ecbff}
 .section-title{margin:28px 0 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .section-title h2{margin:0;font-size:20px;letter-spacing:-.4px}
 .section-title span{color:var(--muted);font-size:13px;font-weight:800}
-.chart-section{display:grid;grid-template-columns:1fr;gap:14px}
-.chart-box{padding:16px;background:radial-gradient(circle at top right,rgba(217,255,95,.06),transparent 32%),var(--panel2)}
-.chart-box h3{margin:0 0 12px;font-size:16px}
-.chart-box h3 small{color:var(--muted);font-size:11px;font-weight:800;margin-left:4px}
 
+.chart-box{padding:16px;background:radial-gradient(circle at top right,rgba(217,255,95,.06),transparent 32%),var(--panel2)}
 .toolbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .toolbar.search{grid-template-columns:1fr}
 .toolbar.sub{grid-template-columns:1fr 1fr;margin-bottom:10px}
@@ -105,14 +103,6 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
 .main-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#102013}
 .sub-btn{background:#14291c;color:var(--text);border:1px solid rgba(255,255,255,.1)}
 .status{color:var(--muted);font-size:14px;margin:6px 0 14px;line-height:1.5}
-
-.flow-chart{width:100%;height:170px;display:block}
-.flow-labels{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:8px;color:var(--muted);font-size:11px;font-weight:800;text-align:center}
-.flow-summary{margin-top:12px;color:var(--soft);font-size:13px;line-height:1.45}
-.flow-summary strong{color:var(--accent)}
-.flow-area{fill:rgba(217,255,95,.16)}
-.flow-line{stroke:var(--accent)}
-.flow-dot{fill:var(--accent);stroke:#fff;stroke-width:2}
 
 .report-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
 .report-card{background:linear-gradient(135deg,rgba(217,255,95,.04),rgba(255,255,255,0)),var(--panel);padding:18px}
@@ -147,11 +137,10 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
   .stock-more{grid-template-columns:1fr}
   .signal-strip{grid-template-columns:1fr 1fr}
   .section-title{align-items:flex-start;flex-direction:column;gap:4px}
-  .chart-section,.report-grid,.split-news,.toolbar,.toolbar.sub,.toolbar.action{grid-template-columns:1fr}
+  .report-grid,.split-news,.toolbar,.toolbar.sub,.toolbar.action{grid-template-columns:1fr}
   .news{grid-template-columns:1fr;gap:10px;padding:14px}
   .news h3{font-size:15px}
   .news p{font-size:12.5px}
-  .flow-chart{height:140px}
 }
 </style>
 </head>
@@ -179,7 +168,7 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
 
 <section class="stock-strip" id="stockStrip">
   <div class="stock-card">
-    <small>증시·관련주 흐름</small>
+    <small>대표주 흐름</small>
     <strong>불러오는 중</strong>
     <span>시장 데이터를 확인하고 있습니다.</span>
   </div>
@@ -208,22 +197,6 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
   </div>
 </section>
 
-<div id="flowBlock">
-  <div class="section-title">
-    <h2 id="flowSectionTitle">산업 흐름 분석</h2>
-    <span>뉴스량 · 키워드 반복도 · 최신성 보정</span>
-  </div>
-
-  <section class="chart-section">
-    <div class="chart-box">
-      <h3 id="flowChartTitle">관심 흐름</h3>
-      <svg class="flow-chart" id="flowChart" viewBox="0 0 720 170" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="flow-labels" id="flowLabels"></div>
-      <div class="flow-summary" id="flowSummary">데이터를 분석 중입니다.</div>
-    </div>
-  </section>
-</div>
-
 <section class="report-grid">
   <div class="report-card">
     <h3>시장 리포트</h3>
@@ -243,20 +216,17 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
 
 <section class="chart-box">
   <div class="toolbar search">
-    <input id="newsSearchInput" type="search" placeholder="뉴스 제목, 출처, 키워드 검색" />
+    <input id="newsSearchInput" type="text" placeholder="뉴스 키워드 검색 (예: 엔비디아, RE100, BTS, Tesla)" />
   </div>
 
   <div class="toolbar">
-    <select id="quickSearch"></select>
     <select id="periodFilter">
       <option value="30">최근 30일</option>
       <option value="90" selected>최근 90일</option>
       <option value="365">최근 1년</option>
       <option value="all">전체</option>
     </select>
-  </div>
 
-  <div class="toolbar sub">
     <select id="categoryFilter">
       <option value="all">전체 카테고리</option>
       <option value="정책">정책</option>
@@ -265,16 +235,16 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
       <option value="리스크">리스크</option>
       <option value="일반">일반</option>
     </select>
+  </div>
 
+  <div class="toolbar sub">
     <select id="sortFilter">
       <option value="main" selected>주요뉴스순</option>
       <option value="score">중요도순</option>
       <option value="latest">최신순</option>
     </select>
-  </div>
 
-  <div class="toolbar action">
-    <button class="main-btn" onclick="loadNews()">뉴스 분석하기</button>
+    <button class="main-btn" onclick="loadNews()">뉴스 검색하기</button>
   </div>
 
   <div class="status" id="status">실제 뉴스를 불러오는 중...</div>
@@ -301,16 +271,7 @@ const INDUSTRY_CONFIG = {
     title:"Solar Intelligence.<br>Read the room.",
     description:"태양광 산업의 정책, 시장, 기술, 리스크 흐름을 정리합니다.",
     footer:"POS · Solar Intelligence Board",
-    flowTitle:"태양광 관심 흐름",
     query:"solar",
-    searches:[
-      ["전체 흐름","solar"],
-      ["정책 변화","solar_policy"],
-      ["REC/SMP","solar_market"],
-      ["ESS·기술","solar_tech"],
-      ["계통 리스크","solar_risk"],
-      ["탄소·기후","solar_climate"]
-    ],
     keywords:["정책","REC","SMP","ESS","인버터","계통","리스크","투자","탄소","탄소감축","탄소배출량","기후변화","재생에너지","RE100","탄소중립","넷제로","온실가스","친환경"],
     tags:["정책","수익성","ESS","계통","안전","사업기회","글로벌","탄소중립","기후변화","재생에너지","RE100","친환경"]
   },
@@ -319,16 +280,7 @@ const INDUSTRY_CONFIG = {
     title:"Entertainment Intelligence.<br>Own the scene.",
     description:"K-POP, 콘텐츠, 투어, 음원, 팬덤, 플랫폼 이슈를 정리합니다.",
     footer:"POS · Entertainment Intelligence Board",
-    flowTitle:"엔터 관심 흐름",
     query:"entertainment",
-    hideFlow:true,
-    searches:[
-      ["전체 흐름","entertainment"],
-      ["컴백·투어","entertainment_tour"],
-      ["음원·차트","entertainment_music"],
-      ["팬덤·플랫폼","entertainment_fandom"],
-      ["리스크","entertainment_risk"]
-    ],
     keywords:["컴백","투어","음원","팬덤","틱톡","굿즈","계약","리스크"],
     tags:["컴백","투어","음원","팬덤","플랫폼","리스크","글로벌"]
   },
@@ -337,15 +289,7 @@ const INDUSTRY_CONFIG = {
     title:"Semiconductor Intelligence.<br>Read the cycle.",
     description:"HBM, AI칩, 메모리, 파운드리, 장비, 수출 규제 흐름을 읽습니다.",
     footer:"POS · Semiconductor Intelligence Board",
-    flowTitle:"반도체 관심 흐름",
     query:"semiconductor",
-    searches:[
-      ["전체 흐름","semiconductor"],
-      ["HBM·AI칩","semiconductor_hbm"],
-      ["메모리","semiconductor_memory"],
-      ["파운드리","semiconductor_foundry"],
-      ["규제·공급망","semiconductor_risk"]
-    ],
     keywords:["HBM","AI칩","GPU","메모리","파운드리","수출","공급망","장비"],
     tags:["HBM","AI칩","메모리","파운드리","공급망","규제","투자"]
   },
@@ -354,15 +298,7 @@ const INDUSTRY_CONFIG = {
     title:"AI Intelligence.<br>Track the shift.",
     description:"LLM, 에이전트, GPU, 클라우드, 모델 경쟁, 규제 흐름을 읽습니다.",
     footer:"POS · AI Intelligence Board",
-    flowTitle:"AI 관심 흐름",
     query:"ai",
-    searches:[
-      ["전체 흐름","ai"],
-      ["모델·서비스","ai_model"],
-      ["GPU·인프라","ai_gpu"],
-      ["AI 에이전트","ai_agent"],
-      ["규제","ai_risk"]
-    ],
     keywords:["LLM","GPU","에이전트","데이터센터","클라우드","규제","모델","자동화"],
     tags:["LLM","GPU","에이전트","인프라","규제","투자","생산성"]
   },
@@ -371,15 +307,7 @@ const INDUSTRY_CONFIG = {
     title:"Mobility Intelligence.<br>Move before the market.",
     description:"전기차, 배터리, 자율주행, 로보택시, 충전 인프라 흐름을 정리합니다.",
     footer:"POS · Mobility Intelligence Board",
-    flowTitle:"모빌리티 관심 흐름",
     query:"mobility",
-    searches:[
-      ["전체 흐름","mobility"],
-      ["전기차","mobility_ev"],
-      ["배터리","mobility_battery"],
-      ["자율주행","mobility_auto"],
-      ["충전·인프라","mobility_charge"]
-    ],
     keywords:["전기차","배터리","자율주행","로보택시","충전","리튬","보조금","테슬라"],
     tags:["전기차","배터리","자율주행","충전","정책","리스크","글로벌"]
   },
@@ -388,17 +316,9 @@ const INDUSTRY_CONFIG = {
     title:"Impact Intelligence.<br>Read the trust.",
     description:"ESG, 사회공헌, 지속가능경영, 캠페인, 브랜드 평판 흐름을 정리합니다.",
     footer:"POS · Impact Intelligence Board",
-    flowTitle:"임팩트 관심 흐름",
     query:"impact",
-    searches:[
-      ["전체 흐름","impact"],
-      ["ESG","impact_esg"],
-      ["사회공헌","impact_csr"],
-      ["지속가능경영","impact_sustainability"],
-      ["브랜드 평판","impact_reputation"]
-    ],
-    keywords:["ESG","사회공헌","지속가능","기부","캠페인","지역사회","평판","브랜드"],
-    tags:["ESG","사회공헌","지속가능","기부","캠페인","평판","브랜드"]
+    keywords:["ESG","사회공헌","탄소","탄소감축","탄소배출량","기후변화","재생에너지","지속가능성","RE100","넷제로","기부","캠페인","지역사회","평판","브랜드"],
+    tags:["ESG","사회공헌","지속가능","기부","캠페인","평판","브랜드","탄소중립","기후변화"]
   }
 };
 
@@ -417,8 +337,7 @@ function initIndustryTabs(){
 function switchIndustry(key){
   currentIndustry = key;
   openedNewsGroups = { domesticMore:false, globalMore:false };
-  const search = document.getElementById("newsSearchInput");
-  if(search) search.value = "";
+  document.getElementById("newsSearchInput").value = "";
   applyIndustryConfig();
   initIndustryTabs();
   loadStocks();
@@ -430,12 +349,6 @@ function applyIndustryConfig(){
   document.getElementById("heroTitle").innerHTML = c.title;
   document.getElementById("heroDescription").textContent = c.description;
   document.getElementById("footerText").textContent = c.footer;
-  document.getElementById("flowChartTitle").textContent = c.flowTitle;
-  document.getElementById("flowBlock").style.display = c.hideFlow ? "none" : "block";
-
-  const quick = document.getElementById("quickSearch");
-  quick.innerHTML = c.searches.map(item => `<option value="${escapeHtml(item[1])}">${escapeHtml(item[0])}</option>`).join("");
-  quick.value = c.query;
 }
 
 async function loadStocks(){
@@ -446,32 +359,43 @@ async function loadStocks(){
     if(!data.ok || !Array.isArray(data.items) || data.items.length === 0) throw new Error();
     renderStocks(data.items);
   }catch{
-    wrap.innerHTML = `<div class="stock-card"><small>증시·관련주 흐름</small><strong>확인 필요</strong><span>주가 데이터를 불러오지 못했습니다.</span></div>`;
+    wrap.innerHTML = `<div class="stock-card"><small>대표주 흐름</small><strong>확인 필요</strong><span>주가 데이터를 불러오지 못했습니다.</span></div>`;
   }
 }
 
 function renderStocks(items){
   const wrap = document.getElementById("stockStrip");
-  const groupOrder = {"국내 증시":1,"국내 관련주":2,"미국 증시":3,"미국 관련주":4,"중국 증시":5,"중국 관련주":6};
+
+  const groupOrder = {
+    "한국 대표주": 1,
+    "미국 대표주": 2,
+    "일본 대표주": 3,
+    "중국 대표주": 4
+  };
+
   const sorted = [...items].sort((a,b)=>(groupOrder[a.group]||99)-(groupOrder[b.group]||99));
-  const firstItems = sorted.slice(0,3);
-  const moreItems = sorted.slice(3);
+  const firstItems = sorted.slice(0,4);
+  const moreItems = sorted.slice(4);
 
   const flag = item => {
-    if((item.group||"").includes("국내")) return "🇰🇷";
-    if((item.group||"").includes("미국")) return "🇺🇸";
-    if((item.group||"").includes("중국")) return "🇨🇳";
+    if((item.group || "").includes("한국")) return "🇰🇷";
+    if((item.group || "").includes("미국")) return "🇺🇸";
+    if((item.group || "").includes("일본")) return "🇯🇵";
+    if((item.group || "").includes("중국")) return "🇨🇳";
     return "🌐";
   };
 
   const renderOne = item => {
     const up = item.direction === "up";
     const isKRStock = item.symbol?.includes(".KS") || item.symbol?.includes(".KQ");
-    const isIndex = item.symbol?.startsWith("^") || item.symbol?.includes(".SS");
+    const isJPStock = item.symbol?.includes(".T");
+    const isCNStock = item.symbol?.includes(".SS") || item.symbol?.includes(".SZ") || item.symbol?.includes(".HK");
+    const currency = isKRStock ? "원" : isJPStock ? "¥" : isCNStock ? "" : "$";
+
     return `
       <div class="stock-card ${up ? "up" : "down"}">
         <small>${flag(item)} ${escapeHtml(item.group)} · ${escapeHtml(item.name)}</small>
-        <strong class="stock-price">${Number(item.price || 0).toLocaleString()}${isKRStock && !isIndex ? "원" : ""}</strong>
+        <strong class="stock-price">${currency === "$" ? "$" : ""}${Number(item.price || 0).toLocaleString()}${currency === "원" ? "원" : currency === "¥" ? "¥" : ""}</strong>
         <div class="stock-change">${up ? "▲" : "▼"} ${Math.abs(Number(item.percent || 0)).toFixed(2)}%</div>
         <span class="stock-note">${escapeHtml(item.note || "시장 흐름 참고")}</span>
       </div>
@@ -480,7 +404,7 @@ function renderStocks(items){
 
   wrap.innerHTML = `
     ${firstItems.map(renderOne).join("")}
-    ${moreItems.length ? `<div id="stockMore" class="stock-more">${moreItems.map(renderOne).join("")}</div><button class="sub-btn stock-more-btn" onclick="toggleStockMore(this)">증시 더보기 ${moreItems.length}개</button>` : ""}
+    ${moreItems.length ? `<div id="stockMore" class="stock-more">${moreItems.map(renderOne).join("")}</div><button class="sub-btn stock-more-btn" onclick="toggleStockMore(this)">대표주 더보기 ${moreItems.length}개</button>` : ""}
   `;
 }
 
@@ -488,11 +412,12 @@ function toggleStockMore(button){
   const target = document.getElementById("stockMore");
   if(!target) return;
   const opened = target.classList.toggle("open");
-  button.textContent = opened ? "접기" : `증시 더보기 ${target.children.length}개`;
+  button.textContent = opened ? "접기" : `대표주 더보기 ${target.children.length}개`;
 }
 
 async function loadNews(){
-  const topic = document.getElementById("quickSearch").value || config().query;
+  const keyword = document.getElementById("newsSearchInput").value.trim();
+  const topic = keyword || config().query;
   const period = document.getElementById("periodFilter").value;
   const status = document.getElementById("status");
 
@@ -519,7 +444,6 @@ function getFilteredData(){
   const category = document.getElementById("categoryFilter").value;
   const sort = document.getElementById("sortFilter").value;
   const periodValue = document.getElementById("periodFilter").value || "90";
-  const searchText = document.getElementById("newsSearchInput")?.value.trim().toLowerCase() || "";
 
   let filtered = [...newsData];
 
@@ -531,13 +455,6 @@ function getFilteredData(){
       const d = new Date(item.pubDate);
       if(isNaN(d.getTime())) return true;
       return d >= fromDate;
-    });
-  }
-
-  if(searchText){
-    filtered = filtered.filter(item => {
-      const text = `${item.title || ""} ${item.source || ""} ${item.category || ""} ${item.rawSummary || ""}`.toLowerCase();
-      return text.includes(searchText);
     });
   }
 
@@ -554,7 +471,6 @@ function render(){
   const filtered = getFilteredData();
   renderStats(filtered);
   renderNews(filtered);
-  if(!config().hideFlow) renderFlowChart(filtered);
   renderReports(filtered);
 }
 
@@ -661,105 +577,6 @@ function getInsightTags(item){
   return tags.length ? tags.slice(0,4) : ["시장참고"];
 }
 
-function renderFlowChart(data){
-  const svg = document.getElementById("flowChart");
-  const labels = document.getElementById("flowLabels");
-  const summary = document.getElementById("flowSummary");
-  const buckets = makeFlowBuckets(data);
-  const max = Math.max(...buckets.map(b => b.value), 1);
-  const min = Math.min(...buckets.map(b => b.value), 0);
-  const width = 720, height = 170, padX = 24, padY = 24;
-
-  const points = buckets.map((b, i) => {
-    const x = padX + (i * ((width - padX * 2) / Math.max(buckets.length - 1, 1)));
-    const normalized = max === min ? 0.5 : (b.value - min) / (max - min);
-    const y = height - padY - (normalized * (height - padY * 2));
-    return { x, y, ...b };
-  });
-
-  const path = createSmoothPath(points);
-  const areaPath = `${path} L ${points[points.length - 1].x} ${height - padY} L ${points[0].x} ${height - padY} Z`;
-
-  svg.innerHTML = `
-    <defs><linearGradient id="flowFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(217,255,95,.25)" /><stop offset="100%" stop-color="rgba(217,255,95,0)" /></linearGradient></defs>
-    <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="rgba(255,255,255,.12)" stroke-width="1" />
-    <path d="${areaPath}" class="flow-area" fill="url(#flowFill)" />
-    <path d="${path}" class="flow-line" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-    ${points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="6" class="flow-dot" />`).join("")}
-  `;
-
-  labels.innerHTML = buckets.map(b => `<span>${b.label}</span>`).join("");
-
-  const first = buckets[0]?.value || 0;
-  const last = buckets[buckets.length - 1]?.value || 0;
-  const diff = last - first;
-  const direction = diff > 4 ? "상승" : diff < -4 ? "하락" : "유지";
-
-  summary.innerHTML = `최근 3개월 ${config().tab} 관심 흐름은 <strong>${direction}</strong>세입니다. 현재 관심도 ${Math.round(last)}점.`;
-}
-
-function makeFlowBuckets(data){
-  const periodValue = document.getElementById("periodFilter").value || "90";
-  const bucketCount = 6;
-  const now = new Date();
-
-  let days = 90;
-  if(periodValue === "30") days = 30;
-  if(periodValue === "365") days = 365;
-  if(periodValue === "all") days = 180;
-
-  const bucketSize = Math.ceil(days / bucketCount);
-
-  const buckets = Array.from({ length: bucketCount }, (_, i) => {
-    const start = new Date();
-    start.setDate(now.getDate() - days + (i * bucketSize));
-    const end = new Date();
-    end.setDate(now.getDate() - days + ((i + 1) * bucketSize));
-    return { start, end, rawCount: 0, keywordScore: 0, value: 0, label: days >= 365 ? `${start.getMonth() + 1}월` : `${start.getMonth() + 1}/${start.getDate()}` };
-  });
-
-  const keywords = config().keywords || [];
-
-  data.forEach(item => {
-    const d = new Date(item.pubDate);
-    if(isNaN(d.getTime())) return;
-    const bucket = buckets.find(b => d >= b.start && d < b.end);
-    if(!bucket) return;
-
-    const text = `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""} ${item.insight || ""}`.toLowerCase();
-    const keywordHits = keywords.filter(k => text.includes(String(k).toLowerCase())).length;
-
-    bucket.rawCount += 1;
-    bucket.keywordScore += keywordHits;
-  });
-
-  const avgCount = Math.max(buckets.reduce((sum, b) => sum + b.rawCount, 0) / bucketCount, 1);
-
-  buckets.forEach((bucket, index) => {
-    const newsVolumeScore = Math.min((bucket.rawCount / avgCount) * 28, 28);
-    const keywordScore = Math.min(bucket.keywordScore * 7, 24);
-    const baseTrend = 46 + index * 2.4;
-    const smoothNoise = index % 2 === 0 ? 1.5 : -1;
-
-    bucket.value = Math.round(baseTrend + newsVolumeScore + keywordScore + smoothNoise);
-    bucket.value = Math.max(38, Math.min(bucket.value, 92));
-  });
-
-  return buckets;
-}
-
-function createSmoothPath(points){
-  if(points.length < 2) return "";
-  let path = `M ${points[0].x} ${points[0].y}`;
-  for(let i = 1; i < points.length; i++){
-    const prev = points[i - 1];
-    const curr = points[i];
-    const midX = (prev.x + curr.x) / 2;
-    path += ` C ${midX} ${prev.y}, ${midX} ${curr.y}, ${curr.x} ${curr.y}`;
-  }
-  return path;
-}
-
 function renderReports(data = getFilteredData()){
   const topArticles = [...data].sort((a,b)=>getMainNewsScore(b)-getMainNewsScore(a)).slice(0,12);
   const fullText = topArticles.map(item=>`${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""} ${item.insight || ""}`).join(" ").toLowerCase();
@@ -828,11 +645,12 @@ function formatDate(date){
   return d.toLocaleDateString("ko-KR");
 }
 
-document.getElementById("newsSearchInput").addEventListener("input", render);
+document.getElementById("newsSearchInput").addEventListener("keydown", e => {
+  if(e.key === "Enter") loadNews();
+});
 document.getElementById("categoryFilter").addEventListener("change", render);
 document.getElementById("sortFilter").addEventListener("change", render);
 document.getElementById("periodFilter").addEventListener("change", loadNews);
-document.getElementById("quickSearch").addEventListener("change", loadNews);
 window.addEventListener("resize", render);
 
 initIndustryTabs();
