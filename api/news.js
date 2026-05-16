@@ -469,6 +469,7 @@ function clean(text = "") {
     .replace(/<!\[CDATA\[|\]\]>/g, "")
     .replace(/<li\b[^>]*>/gi, " ")
     .replace(/<\/li>/gi, " ")
+    .replace(/<br\s*\/?>/gi, " ")
     .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
     .replace(/<font\b[^>]*>(.*?)<\/font>/gi, "$1")
     .replace(/<[^>]*>/g, " ")
@@ -476,15 +477,45 @@ function clean(text = "") {
     .trim();
 }
 
+function decodeHtml(text = "") {
+  let value = String(text || "");
+
+  for (let i = 0; i < 3; i++) {
+    value = value
+      .replace(/&nbsp;/g, " ")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">");
+  }
+
+  return value;
+}
+
 function makeReadableSummary(description = "", title = "", source = "") {
-  let text = clean(description || "");
   const titleText = clean(title || "");
   const sourceText = clean(source || "");
 
+  let text = decodeHtml(description || "")
+    .replace(/<!\[CDATA\[|\]\]>/g, "")
+    .replace(/<li\b[^>]*>/gi, " ")
+    .replace(/<\/li>/gi, " ")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
+    .replace(/<font\b[^>]*>(.*?)<\/font>/gi, "$1")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
   text = text
     .replace(/관련기사/gi, "")
+    .replace(/Google 뉴스에서 전체 콘텐츠 보기/gi, "")
+    .replace(/Google News에서 전체 콘텐츠 보기/gi, "")
     .replace(/Google 뉴스/gi, "")
     .replace(/Google News/gi, "")
+    .replace(/전체 콘텐츠 보기/gi, "")
     .replace(/전체 기사 보기/gi, "")
     .replace(/기사 원문/gi, "")
     .replace(/더보기/gi, "")
@@ -508,13 +539,17 @@ function makeReadableSummary(description = "", title = "", source = "") {
 
   text = text
     .replace(/^[-–—|:·\s]+/, "")
-    .replace(/\s-\s[^-]{2,40}$/g, "")
+    .replace(/\s-\s[^-]{2,50}$/g, "")
     .replace(/\[[^\]]+\]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
-  if (!text || text.length < 20) {
-    return titleText || "기사 내용을 확인해 산업 흐름을 참고하세요.";
+  if (
+    !text ||
+    text.length < 15 ||
+    text.toLowerCase() === titleText.toLowerCase()
+  ) {
+    return "";
   }
 
   if (text.length > 220) {
