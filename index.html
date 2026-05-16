@@ -26,8 +26,8 @@ html,body{
 }
 button,input,select{font-family:inherit}
 button{cursor:pointer}
-.app{max-width:1180px;margin:0 auto;padding:24px}
-.header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+.app{max-width:1180px;margin:0 auto;padding:34px 24px 24px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
 .brand{display:flex;align-items:center;gap:10px}
 .logo-mark{width:38px;height:38px;flex:0 0 38px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 12px 34px rgba(217,255,95,.22)}
 .logo-text{display:flex;flex-direction:column;justify-content:center;gap:1px}
@@ -86,12 +86,13 @@ button{cursor:pointer}
 .section-title{margin:28px 0 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .section-title h2{margin:0;font-size:20px;letter-spacing:-.4px}
 .section-title span{color:var(--muted);font-size:13px;font-weight:800}
-.chart-section{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart-section{display:grid;grid-template-columns:1fr;gap:14px}
 .chart-box{padding:16px;background:radial-gradient(circle at top right,rgba(217,255,95,.06),transparent 32%),var(--panel2)}
 .chart-box h3{margin:0 0 12px;font-size:16px}
 .chart-box h3 small{color:var(--muted);font-size:11px;font-weight:800;margin-left:4px}
 
 .toolbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.toolbar.search{grid-template-columns:1fr}
 .toolbar.sub{grid-template-columns:1fr 1fr;margin-bottom:10px}
 .toolbar.action{grid-template-columns:1fr;margin-bottom:14px}
 input,select{
@@ -105,11 +106,6 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
 .sub-btn{background:#14291c;color:var(--text);border:1px solid rgba(255,255,255,.1)}
 .status{color:var(--muted);font-size:14px;margin:6px 0 14px;line-height:1.5}
 
-.keyword-bars{display:grid;gap:10px}
-.keyword-row{display:grid;grid-template-columns:72px 1fr 34px;align-items:center;gap:10px;color:var(--soft);font-size:12px;font-weight:900}
-.keyword-track,.interest-track{height:9px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
-.keyword-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-
 .flow-chart{width:100%;height:170px;display:block}
 .flow-labels{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:8px;color:var(--muted);font-size:11px;font-weight:800;text-align:center}
 .flow-summary{margin-top:12px;color:var(--soft);font-size:13px;line-height:1.45}
@@ -117,15 +113,6 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
 .flow-area{fill:rgba(217,255,95,.16)}
 .flow-line{stroke:var(--accent)}
 .flow-dot{fill:var(--accent);stroke:#fff;stroke-width:2}
-
-.interest-wrap{display:grid;grid-template-columns:180px 1fr;gap:18px;align-items:center}
-.interest-chart{width:180px;height:180px}
-.interest-bg{fill:none;stroke:rgba(255,255,255,.07);stroke-width:10}
-.interest-center{font-size:7px;font-weight:950;fill:var(--accent);text-anchor:middle}
-.interest-sub{font-size:3.2px;fill:var(--muted);text-anchor:middle}
-.interest-list{display:grid;gap:9px}
-.interest-item{display:grid;grid-template-columns:64px 1fr 36px;gap:8px;align-items:center;color:var(--soft);font-size:12px;font-weight:900}
-.interest-fill{height:100%;border-radius:999px}
 
 .report-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
 .report-card{background:linear-gradient(135deg,rgba(217,255,95,.04),rgba(255,255,255,0)),var(--panel);padding:18px}
@@ -149,7 +136,7 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
 .footer{text-align:center;color:#728476;font-size:12px;margin:24px 0 8px}
 
 @media(max-width:820px){
-  .app{padding:16px}
+  .app{padding:26px 16px 20px}
   .logo-mark{width:34px;height:34px;flex-basis:34px}
   .logo-text strong{font-size:22px}
   .logo-text span{font-size:9px}
@@ -161,8 +148,6 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
   .signal-strip{grid-template-columns:1fr 1fr}
   .section-title{align-items:flex-start;flex-direction:column;gap:4px}
   .chart-section,.report-grid,.split-news,.toolbar,.toolbar.sub,.toolbar.action{grid-template-columns:1fr}
-  .interest-wrap{grid-template-columns:1fr}
-  .interest-chart{margin:0 auto}
   .news{grid-template-columns:1fr;gap:10px;padding:14px}
   .news h3{font-size:15px}
   .news p{font-size:12.5px}
@@ -223,32 +208,21 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
   </div>
 </section>
 
-<div class="section-title">
-  <h2 id="flowSectionTitle">산업 흐름 분석</h2>
-  <span>뉴스량 · 키워드 반복도 · 최신성 보정</span>
-</div>
-
-<section class="chart-section">
-  <div class="chart-box">
-    <h3 id="flowChartTitle">관심 흐름</h3>
-    <svg class="flow-chart" id="flowChart" viewBox="0 0 720 170" preserveAspectRatio="xMidYMid meet"></svg>
-    <div class="flow-labels" id="flowLabels"></div>
-    <div class="flow-summary" id="flowSummary">데이터를 분석 중입니다.</div>
+<div id="flowBlock">
+  <div class="section-title">
+    <h2 id="flowSectionTitle">산업 흐름 분석</h2>
+    <span>뉴스량 · 키워드 반복도 · 최신성 보정</span>
   </div>
 
-  <div class="chart-box">
-    <h3>시장 관심 분포</h3>
-    <div class="interest-wrap">
-      <svg class="interest-chart" id="interestChart" viewBox="0 0 100 100"></svg>
-      <div class="interest-list" id="interestList"></div>
+  <section class="chart-section">
+    <div class="chart-box">
+      <h3 id="flowChartTitle">관심 흐름</h3>
+      <svg class="flow-chart" id="flowChart" viewBox="0 0 720 170" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="flow-labels" id="flowLabels"></div>
+      <div class="flow-summary" id="flowSummary">데이터를 분석 중입니다.</div>
     </div>
-  </div>
-
-  <div class="chart-box">
-    <h3>키워드 관심도 <small>최근 30일</small></h3>
-    <div class="keyword-bars" id="keywordBars"></div>
-  </div>
-</section>
+  </section>
+</div>
 
 <section class="report-grid">
   <div class="report-card">
@@ -268,6 +242,10 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
 </div>
 
 <section class="chart-box">
+  <div class="toolbar search">
+    <input id="newsSearchInput" type="search" placeholder="뉴스 제목, 출처, 키워드 검색" />
+  </div>
+
   <div class="toolbar">
     <select id="quickSearch"></select>
     <select id="periodFilter">
@@ -330,10 +308,11 @@ const INDUSTRY_CONFIG = {
       ["정책 변화","solar_policy"],
       ["REC/SMP","solar_market"],
       ["ESS·기술","solar_tech"],
-      ["계통 리스크","solar_risk"]
+      ["계통 리스크","solar_risk"],
+      ["탄소·기후","solar_climate"]
     ],
-    keywords:["정책","REC","SMP","ESS","인버터","계통","리스크","투자"],
-    tags:["정책","수익성","ESS","계통","안전","사업기회","글로벌"]
+    keywords:["정책","REC","SMP","ESS","인버터","계통","리스크","투자","탄소","탄소감축","탄소배출량","기후변화","재생에너지","RE100","탄소중립","넷제로","온실가스","친환경"],
+    tags:["정책","수익성","ESS","계통","안전","사업기회","글로벌","탄소중립","기후변화","재생에너지","RE100","친환경"]
   },
   entertainment:{
     tab:"Entertainment",
@@ -342,6 +321,7 @@ const INDUSTRY_CONFIG = {
     footer:"POS · Entertainment Intelligence Board",
     flowTitle:"엔터 관심 흐름",
     query:"entertainment",
+    hideFlow:true,
     searches:[
       ["전체 흐름","entertainment"],
       ["컴백·투어","entertainment_tour"],
@@ -437,6 +417,8 @@ function initIndustryTabs(){
 function switchIndustry(key){
   currentIndustry = key;
   openedNewsGroups = { domesticMore:false, globalMore:false };
+  const search = document.getElementById("newsSearchInput");
+  if(search) search.value = "";
   applyIndustryConfig();
   initIndustryTabs();
   loadStocks();
@@ -449,6 +431,7 @@ function applyIndustryConfig(){
   document.getElementById("heroDescription").textContent = c.description;
   document.getElementById("footerText").textContent = c.footer;
   document.getElementById("flowChartTitle").textContent = c.flowTitle;
+  document.getElementById("flowBlock").style.display = c.hideFlow ? "none" : "block";
 
   const quick = document.getElementById("quickSearch");
   quick.innerHTML = c.searches.map(item => `<option value="${escapeHtml(item[1])}">${escapeHtml(item[0])}</option>`).join("");
@@ -536,6 +519,7 @@ function getFilteredData(){
   const category = document.getElementById("categoryFilter").value;
   const sort = document.getElementById("sortFilter").value;
   const periodValue = document.getElementById("periodFilter").value || "90";
+  const searchText = document.getElementById("newsSearchInput")?.value.trim().toLowerCase() || "";
 
   let filtered = [...newsData];
 
@@ -550,6 +534,13 @@ function getFilteredData(){
     });
   }
 
+  if(searchText){
+    filtered = filtered.filter(item => {
+      const text = `${item.title || ""} ${item.source || ""} ${item.category || ""} ${item.rawSummary || ""}`.toLowerCase();
+      return text.includes(searchText);
+    });
+  }
+
   if(category !== "all") filtered = filtered.filter(item => item.category === category);
 
   if(sort === "latest") filtered.sort((a,b)=>new Date(b.pubDate)-new Date(a.pubDate));
@@ -559,24 +550,11 @@ function getFilteredData(){
   return filtered.slice(0,60);
 }
 
-function getKeywordTrendData(){
-  const fromDate = new Date();
-  fromDate.setDate(new Date().getDate() - 30);
-  return newsData.filter(item => {
-    const d = new Date(item.pubDate);
-    if(isNaN(d.getTime())) return true;
-    return d >= fromDate;
-  });
-}
-
 function render(){
   const filtered = getFilteredData();
-  const keywordData = getKeywordTrendData();
   renderStats(filtered);
   renderNews(filtered);
-  renderKeywordBars(keywordData);
-  renderFlowChart(filtered);
-  renderInterestChart(filtered);
+  if(!config().hideFlow) renderFlowChart(filtered);
   renderReports(filtered);
 }
 
@@ -683,26 +661,6 @@ function getInsightTags(item){
   return tags.length ? tags.slice(0,4) : ["시장참고"];
 }
 
-function renderKeywordBars(data){
-  const keywords = config().keywords;
-  const rows = keywords.map(keyword => {
-    const count = data.filter(article => {
-      const text = `${article.title || ""} ${article.rawSummary || ""} ${article.summary || ""}`.toLowerCase();
-      return text.includes(keyword.toLowerCase());
-    }).length;
-    return { keyword, count };
-  });
-
-  const max = Math.max(...rows.map(r=>r.count),1);
-  document.getElementById("keywordBars").innerHTML = rows.map(row => `
-    <div class="keyword-row">
-      <span>${escapeHtml(row.keyword)}</span>
-      <div class="keyword-track"><div class="keyword-fill" style="width:${Math.round((row.count/max)*100)}%"></div></div>
-      <span>${row.count}</span>
-    </div>
-  `).join("");
-}
-
 function renderFlowChart(data){
   const svg = document.getElementById("flowChart");
   const labels = document.getElementById("flowLabels");
@@ -802,38 +760,6 @@ function createSmoothPath(points){
   return path;
 }
 
-function renderInterestChart(data){
-  const chart = document.getElementById("interestChart");
-  const list = document.getElementById("interestList");
-  const categories = [
-    { key:"정책", color:"#d9ff5f" },
-    { key:"시장", color:"#8ecbff" },
-    { key:"기술", color:"#73ff9c" },
-    { key:"리스크", color:"#ff7b7b" }
-  ];
-  const total = Math.max(data.length,1);
-  const rows = categories.map(item=>({...item,count:data.filter(article=>article.category===item.key).length}));
-  const top = [...rows].sort((a,b)=>b.count-a.count)[0] || rows[0];
-  const topPercent = Math.round((top.count/total)*100);
-  const radius=34,circumference=2*Math.PI*radius,dash=circumference*topPercent/100;
-
-  chart.innerHTML = `
-    <circle class="interest-bg" cx="50" cy="50" r="${radius}"></circle>
-    <circle cx="50" cy="50" r="${radius}" fill="none" stroke="${top.color}" stroke-width="10" stroke-dasharray="${dash} ${circumference-dash}" stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
-    <text x="50" y="47" class="interest-center">${topPercent}%</text>
-    <text x="50" y="58" class="interest-sub">${escapeHtml(top.key)}</text>
-  `;
-
-  const max = Math.max(...rows.map(r=>r.count),1);
-  list.innerHTML = rows.map(row=>`
-    <div class="interest-item">
-      <span>${escapeHtml(row.key)}</span>
-      <div class="interest-track"><div class="interest-fill" style="width:${Math.round((row.count/max)*100)}%;background:${row.color};"></div></div>
-      <span>${row.count}</span>
-    </div>
-  `).join("");
-}
-
 function renderReports(data = getFilteredData()){
   const topArticles = [...data].sort((a,b)=>getMainNewsScore(b)-getMainNewsScore(a)).slice(0,12);
   const fullText = topArticles.map(item=>`${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""} ${item.insight || ""}`).join(" ").toLowerCase();
@@ -902,6 +828,7 @@ function formatDate(date){
   return d.toLocaleDateString("ko-KR");
 }
 
+document.getElementById("newsSearchInput").addEventListener("input", render);
 document.getElementById("categoryFilter").addEventListener("change", render);
 document.getElementById("sortFilter").addEventListener("change", render);
 document.getElementById("periodFilter").addEventListener("change", loadNews);
