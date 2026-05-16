@@ -859,47 +859,94 @@ function renderGlobalSolar(){
     </div>
   `).join("");
 }
-
 function renderReports(data = getFilteredData()){
   const checkList = document.getElementById("checkList");
   const salesList = document.getElementById("salesList");
 
-  const topArticles = [...data].sort((a,b) => getMainNewsScore(b) - getMainNewsScore(a)).slice(0, 8);
-  const headlineText = topArticles.map(item => `${item.title || ""} ${item.summary || ""}`).join(" ");
+  const topArticles = [...data]
+    .sort((a,b) => getMainNewsScore(b) - getMainNewsScore(a))
+    .slice(0, 10);
 
-  const policy = /정책|산업부|보조금|지원사업|RPS|규제|고시|인허가/.test(headlineText);
-  const revenue = /REC|SMP|전력시장|가격|수익|전력거래/.test(headlineText);
-  const ess = /ESS|배터리|저장|양수발전|전력저장/.test(headlineText);
-  const grid = /계통|접속|지연|송전|배전|정전/.test(headlineText);
-  const safety = /화재|고장|안전|민원|손실|유지보수/.test(headlineText);
+  const fullText = topArticles
+    .map(item => `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""} ${item.insight || ""}`)
+    .join(" ");
 
-  const checks = [];
+  const hasPolicy = /정책|산업부|보조금|지원사업|RPS|규제|고시|인허가|policy|subsidy|ira/.test(fullText);
+  const hasRevenue = /REC|SMP|전력시장|가격|수익|전력거래|market|price/.test(fullText);
+  const hasEss = /ESS|배터리|저장|양수발전|전력저장|battery|storage/.test(fullText);
+  const hasGrid = /계통|접속|지연|송전|배전|정전|grid|curtailment|delay/.test(fullText);
+  const hasSafety = /화재|고장|안전|민원|손실|유지보수|risk|fire|safety/.test(fullText);
+  const hasGlobal = /china|중국|공급망|폴리실리콘|미국|ira|유럽|europe|global|solar industry/.test(fullText);
 
-  if(policy) checks.push("정책·지원사업 관련 뉴스 비중이 확인됩니다.");
-  if(revenue) checks.push("REC/SMP와 수익성 이슈가 함께 언급되고 있습니다.");
-  if(ess) checks.push("ESS·저장장치 연계 흐름이 다시 부각되고 있습니다.");
-  if(grid) checks.push("계통 접속·송전 리스크 관련 보도가 반복 노출되고 있습니다.");
-  if(safety) checks.push("안전·유지보수 이슈는 운영 리스크 관점에서 확인이 필요합니다.");
+  const report = [];
 
-  if(checks.length === 0){
-    checks.push("상위 뉴스에서 강한 정책·시장·리스크 신호는 아직 제한적입니다.");
-    checks.push("최근 90일 기준 또는 해외 태양광 주제로 흐름을 넓혀 확인하는 것이 좋습니다.");
+  if(hasPolicy){
+    report.push("정책·지원사업 관련 보도가 확인됩니다. 제도 변화가 수주 일정과 사업 검토 기준에 영향을 줄 수 있습니다.");
+  }
+
+  if(hasRevenue){
+    report.push("REC/SMP와 수익성 관련 흐름이 함께 언급되고 있습니다. 발전사업자의 수익 안정성 이슈를 주의 깊게 볼 필요가 있습니다.");
+  }
+
+  if(hasEss){
+    report.push("ESS·저장장치 관련 흐름이 감지됩니다. 단순 시공보다 저장·운영 안정성 중심의 시장 관심이 커질 수 있습니다.");
+  }
+
+  if(hasGrid){
+    report.push("계통 접속·송전 인프라 이슈가 반복 노출되고 있습니다. 신규 사업 일정과 접속 가능성 검토가 중요해지는 구간입니다.");
+  }
+
+  if(hasSafety){
+    report.push("안전·유지보수 관련 이슈가 확인됩니다. 설치 이후 운영 안정성과 사후관리 신뢰도가 중요한 판단 요소가 될 수 있습니다.");
+  }
+
+  if(hasGlobal){
+    report.push("해외 태양광·공급망 관련 흐름도 함께 감지됩니다. 모듈 가격, 원자재, 글로벌 정책 변화가 국내 시장에 영향을 줄 수 있습니다.");
+  }
+
+  if(report.length === 0){
+    report.push("현재 상위 뉴스에서는 강한 정책·시장·리스크 신호가 제한적입니다. 최근 90일 또는 해외 태양광 기준으로 흐름을 넓혀 확인하는 것이 좋습니다.");
   }
 
   const sales = [];
 
-  if(policy) sales.push("정책 흐름은 제안서의 시장 배경 자료로 활용하기 좋습니다.");
-  if(revenue) sales.push("REC/SMP 이슈는 발전사업자 상담 시 수익성 시뮬레이션 근거로 연결할 수 있습니다.");
-  if(ess) sales.push("ESS 연계 제안은 전력 안정화·피크 대응 관점에서 설득력이 높아집니다.");
-  if(grid) sales.push("계통 리스크는 사전 검토·접속 가능성·유지관리 제안 포인트로 활용할 수 있습니다.");
-  if(safety) sales.push("안전·유지보수 이슈는 사후관리 계약 제안 근거로 활용할 수 있습니다.");
-
-  if(sales.length === 0){
-    sales.push("현재 뉴스 흐름은 직접 영업 제안보다 시장 모니터링 자료로 활용하는 것이 적절합니다.");
+  if(hasPolicy){
+    sales.push("정책 뉴스는 제안서 첫 장의 시장 배경 자료로 활용하세요. 고객에게 ‘왜 지금 검토해야 하는지’를 설명하는 근거가 됩니다.");
   }
 
-  checkList.innerHTML = uniqueItems(checks).slice(0,10).map(item => `<li>${escapeHtml(item)}</li>`).join("");
-  salesList.innerHTML = uniqueItems(sales).slice(0,8).map(item => `<li>${escapeHtml(item)}</li>`).join("");
+  if(hasRevenue){
+    sales.push("REC/SMP 이슈는 발전사업자 상담에서 수익성 시뮬레이션과 장기 운영 수익 검토 포인트로 연결하세요.");
+  }
+
+  if(hasEss){
+    sales.push("ESS 흐름은 저장장치 연계, 피크 대응, 전력 안정화 제안으로 확장할 수 있습니다. 단가보다 운영 효율 관점으로 설명하는 것이 좋습니다.");
+  }
+
+  if(hasGrid){
+    sales.push("계통 리스크는 사전 부지 검토, 접속 가능성 확인, 인허가 일정 관리의 필요성을 강조하는 영업 포인트로 활용하세요.");
+  }
+
+  if(hasSafety){
+    sales.push("안전·유지보수 이슈는 정기점검, 모니터링, 사후관리 계약 제안의 근거로 활용할 수 있습니다.");
+  }
+
+  if(hasGlobal){
+    sales.push("해외 공급망 이슈는 모듈 가격 변동 가능성, 납기 리스크, 장기 조달 전략을 설명하는 상담 자료로 활용하세요.");
+  }
+
+  if(sales.length === 0){
+    sales.push("현재 뉴스 흐름은 즉각적인 영업 제안보다 시장 모니터링 자료로 활용하는 것이 적절합니다.");
+  }
+
+  checkList.innerHTML = uniqueItems(report)
+    .slice(0, 10)
+    .map(item => `<li>${escapeHtml(item)}</li>`)
+    .join("");
+
+  salesList.innerHTML = uniqueItems(sales)
+    .slice(0, 8)
+    .map(item => `<li>${escapeHtml(item)}</li>`)
+    .join("");
 }
 
 function uniqueItems(items){
