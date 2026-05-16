@@ -1,59 +1,61 @@
 export default async function handler(req, res){
-
   try{
-
     const stocks = [
       {
         name:"한화솔루션",
-        symbol:"009830.KS"
+        symbol:"009830.KS",
+        note:"태양광 밸류체인·정책 수혜 관찰"
       },
       {
         name:"HD현대에너지솔루션",
-        symbol:"322000.KS"
+        symbol:"322000.KS",
+        note:"모듈·ESS·발전사업 흐름 관찰"
       },
       {
         name:"OCI홀딩스",
-        symbol:"010060.KS"
+        symbol:"010060.KS",
+        note:"폴리실리콘·글로벌 공급망 관찰"
       }
     ];
 
-    const results = await Promise.all(
+    const items = await Promise.all(
       stocks.map(fetchStock)
     );
 
     return res.status(200).json({
       ok:true,
-      items:results.filter(Boolean)
+      items:items.filter(Boolean)
     });
 
   }catch(error){
-
     return res.status(500).json({
       ok:false,
       message:error.message
     });
-
   }
-
 }
 
 async function fetchStock(stock){
-
   try{
-
     const url =
       `https://query1.finance.yahoo.com/v8/finance/chart/${stock.symbol}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers:{
+        "User-Agent":"Mozilla/5.0"
+      }
+    });
 
-    if(!response.ok) return null;
+    if(!response.ok){
+      return null;
+    }
 
     const data = await response.json();
+    const result = data?.chart?.result?.[0];
 
-    const result =
-      data?.chart?.result?.[0];
-
-    if(!result) return null;
+    if(!result){
+      return null;
+    }
 
     const meta = result.meta || {};
 
@@ -63,12 +65,16 @@ async function fetchStock(stock){
     const previous =
       Number(meta.previousClose || current);
 
+    if(!current){
+      return null;
+    }
+
     const diff =
       current - previous;
 
     const percent =
       previous
-        ? ((diff / previous) * 100)
+        ? (diff / previous) * 100
         : 0;
 
     return {
@@ -77,16 +83,11 @@ async function fetchStock(stock){
       price:current,
       diff:Number(diff.toFixed(2)),
       percent:Number(percent.toFixed(2)),
-      direction:
-        percent >= 0
-          ? "up"
-          : "down"
+      direction:percent >= 0 ? "up" : "down",
+      note:stock.note
     };
 
   }catch(error){
-
     return null;
-
   }
-
 }
