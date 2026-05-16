@@ -6,16 +6,14 @@ export default async function handler(req, res){
       { group:"국내 관련주", name:"한화솔루션", symbol:"009830.KS", note:"태양광 밸류체인·정책 수혜 관찰" },
       { group:"국내 관련주", name:"HD현대에너지솔루션", symbol:"322000.KS", note:"모듈·ESS·발전사업 흐름 관찰" },
       { group:"국내 관련주", name:"OCI홀딩스", symbol:"010060.KS", note:"폴리실리콘·글로벌 공급망 관찰" },
-
-      { group:"미국 증시", name:"NASDAQ", symbol:"^IXIC", note:"성장주·기술주 투자심리" },
-      { group:"미국 증시", name:"S&P 500", symbol:"^GSPC", note:"미국 대표 시장 흐름" },
+      
       { group:"미국 관련주", name:"First Solar", symbol:"FSLR", note:"미국 태양광 대표주" },
       { group:"미국 관련주", name:"Enphase", symbol:"ENPH", note:"인버터·에너지 관리" },
-      { group:"미국 관련주", name:"Tesla", symbol:"TSLA", note:"ESS·에너지 저장 흐름" },
+      { group:"미국 관련주", name:"SolarEdge", symbol:"SEDG", note:"태양광 인버터·전력 최적화" },
 
-      { group:"중국 증시", name:"Shanghai", symbol:"000001.SS", note:"중국 본토 시장 흐름" },
-      { group:"중국 증시", name:"CSI 300", symbol:"000300.SS", note:"중국 대형주 흐름" },
-      { group:"중국 관련주", name:"JinkoSolar", symbol:"JKS", note:"중국 태양광 모듈" }
+      { group:"중국 관련주", name:"JinkoSolar", symbol:"JKS", note:"중국 태양광 모듈" },
+      { group:"중국 관련주", name:"Daqo New Energy", symbol:"DQ", note:"폴리실리콘 공급망" },
+      { group:"중국 관련주", name:"Canadian Solar", symbol:"CSIQ", note:"중국계 글로벌 태양광 모듈" }
     ];
 
     const items = await Promise.all(
