@@ -171,10 +171,28 @@ function getNewsProfile(industry, topic = "") {
     entertainment: {
       label: "엔터",
       include: [
-        "엔터", "엔터테인먼트", "케이팝", "K팝", "K-POP", "KPOP",
-        "하이브", "에스엠", "SM", "JYP", "YG", "콘서트", "월드투어",
-        "음원", "팬덤", "아이돌", "HYBE", "BTS", "Blackpink",
-        "K-pop", "Korean music", "Korean entertainment"
+        "엔터",
+        "엔터테인먼트",
+        "케이팝",
+        "K팝",
+        "K-POP",
+        "KPOP",
+        "하이브",
+        "에스엠",
+        "SM",
+        "JYP",
+        "YG",
+        "콘서트",
+        "월드투어",
+        "음원",
+        "팬덤",
+        "아이돌",
+        "HYBE",
+        "BTS",
+        "Blackpink",
+        "K-pop",
+        "Korean music",
+        "Korean entertainment"
       ],
       exclude: [],
       topicMap: {
@@ -190,10 +208,34 @@ function getNewsProfile(industry, topic = "") {
           "음원",
           "팬덤"
         ],
-        entertainment_tour: ["컴백", "콘서트", "월드투어", "팬미팅", "K팝 투어"],
-        entertainment_music: ["음원", "빌보드", "멜론", "스포티파이", "유튜브 뮤직"],
-        entertainment_fandom: ["팬덤", "위버스", "버블", "틱톡", "굿즈"],
-        entertainment_risk: ["엔터 리스크", "전속계약", "소송", "논란", "아티스트 리스크"]
+        entertainment_tour: [
+          "컴백",
+          "콘서트",
+          "월드투어",
+          "팬미팅",
+          "K팝 투어"
+        ],
+        entertainment_music: [
+          "음원",
+          "빌보드",
+          "멜론",
+          "스포티파이",
+          "유튜브 뮤직"
+        ],
+        entertainment_fandom: [
+          "팬덤",
+          "위버스",
+          "버블",
+          "틱톡",
+          "굿즈"
+        ],
+        entertainment_risk: [
+          "엔터 리스크",
+          "전속계약",
+          "소송",
+          "논란",
+          "아티스트 리스크"
+        ]
       },
       global: [
         "K-pop",
@@ -212,17 +254,58 @@ function getNewsProfile(industry, topic = "") {
     semiconductor: {
       label: "반도체",
       include: [
-        "반도체", "HBM", "AI칩", "GPU", "메모리", "파운드리",
-        "삼성전자", "SK하이닉스", "TSMC", "엔비디아",
-        "semiconductor", "NVIDIA", "chip", "foundry", "memory"
+        "반도체",
+        "HBM",
+        "AI칩",
+        "GPU",
+        "메모리",
+        "파운드리",
+        "삼성전자",
+        "SK하이닉스",
+        "TSMC",
+        "엔비디아",
+        "semiconductor",
+        "NVIDIA",
+        "chip",
+        "foundry",
+        "memory"
       ],
       exclude: [],
       topicMap: {
-        semiconductor: ["반도체", "HBM", "AI 반도체", "삼성전자 반도체", "SK하이닉스", "파운드리"],
-        semiconductor_hbm: ["HBM", "AI 반도체", "엔비디아", "GPU", "고대역폭메모리"],
-        semiconductor_memory: ["D램", "낸드", "메모리 반도체", "SK하이닉스", "삼성전자 메모리"],
-        semiconductor_foundry: ["파운드리", "TSMC", "삼성 파운드리", "반도체 위탁생산"],
-        semiconductor_risk: ["반도체 수출규제", "공급망", "미국 중국 반도체", "반도체 장비"]
+        semiconductor: [
+          "반도체",
+          "HBM",
+          "AI 반도체",
+          "삼성전자 반도체",
+          "SK하이닉스",
+          "파운드리"
+        ],
+        semiconductor_hbm: [
+          "HBM",
+          "AI 반도체",
+          "엔비디아",
+          "GPU",
+          "고대역폭메모리"
+        ],
+        semiconductor_memory: [
+          "D램",
+          "낸드",
+          "메모리 반도체",
+          "SK하이닉스",
+          "삼성전자 메모리"
+        ],
+        semiconductor_foundry: [
+          "파운드리",
+          "TSMC",
+          "삼성 파운드리",
+          "반도체 위탁생산"
+        ],
+        semiconductor_risk: [
+          "반도체 수출규제",
+          "공급망",
+          "미국 중국 반도체",
+          "반도체 장비"
+        ]
       },
       global: [
         "semiconductor",
@@ -239,9 +322,18 @@ function getNewsProfile(industry, topic = "") {
     ai: {
       label: "AI",
       include: [
-        "AI", "인공지능", "생성형 AI", "LLM", "OpenAI", "Anthropic",
-        "GPU", "에이전트", "데이터센터",
-        "artificial intelligence", "generative AI", "AI agents"
+        "AI",
+        "인공지능",
+        "생성형 AI",
+        "LLM",
+        "OpenAI",
+        "Anthropic",
+        "GPU",
+        "에이전트",
+        "데이터센터",
+        "artificial intelligence",
+        "generative AI",
+        "AI agents"
       ],
       exclude: [],
       topicMap: {
@@ -265,9 +357,19 @@ function getNewsProfile(industry, topic = "") {
     mobility: {
       label: "모빌리티",
       include: [
-        "전기차", "EV", "배터리", "자율주행", "로보택시", "테슬라",
-        "현대차", "충전", "electric vehicle", "Tesla",
-        "EV battery", "autonomous driving", "robotaxi"
+        "전기차",
+        "EV",
+        "배터리",
+        "자율주행",
+        "로보택시",
+        "테슬라",
+        "현대차",
+        "충전",
+        "electric vehicle",
+        "Tesla",
+        "EV battery",
+        "autonomous driving",
+        "robotaxi"
       ],
       exclude: [],
       topicMap: {
@@ -289,6 +391,7 @@ function getNewsProfile(industry, topic = "") {
   };
 
   const profile = profiles[industry] || profiles.solar;
+
   const domesticQueries =
     profile.topicMap[topic] ||
     profile.topicMap[industry] ||
@@ -373,7 +476,10 @@ async function fetchGoogleRss({
     if (!response.ok) return [];
 
     const xml = await response.text();
-    if (!xml || !xml.includes("<item>")) return [];
+
+    if (!xml || !xml.includes("<item>")) {
+      return [];
+    }
 
     const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
 
@@ -417,7 +523,7 @@ function normalizeArticle({
     source: cleanSource,
     title: cleanTitle,
     rawSummary: cleanSummary,
-    summary: makeReadableSummary(cleanSummary, cleanTitle, cleanSource),
+    summary: makeReadableSummary(rawSummary),
     link: clean(link),
     pubDate: clean(pubDate),
     category: detectCategory(text),
@@ -477,80 +583,20 @@ function clean(text = "") {
     .trim();
 }
 
-function decodeHtml(text = "") {
-  let value = String(text || "");
-
-  for (let i = 0; i < 3; i++) {
-    value = value
-      .replace(/&nbsp;/g, " ")
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&apos;/g, "'")
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">");
-  }
-
-  return value;
-}
-
-function makeReadableSummary(description = "", title = "", source = "") {
-  const titleText = clean(title || "");
-  const sourceText = clean(source || "");
-
-  let text = decodeHtml(description || "")
-    .replace(/<!\[CDATA\[|\]\]>/g, "")
-    .replace(/<li\b[^>]*>/gi, " ")
-    .replace(/<\/li>/gi, " ")
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
-    .replace(/<font\b[^>]*>(.*?)<\/font>/gi, "$1")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+function makeReadableSummary(description = "") {
+  let text = clean(description || "");
 
   text = text
-    .replace(/관련기사/gi, "")
     .replace(/Google 뉴스에서 전체 콘텐츠 보기/gi, "")
     .replace(/Google News에서 전체 콘텐츠 보기/gi, "")
     .replace(/Google 뉴스/gi, "")
     .replace(/Google News/gi, "")
-    .replace(/전체 콘텐츠 보기/gi, "")
+    .replace(/관련기사/gi, "")
     .replace(/전체 기사 보기/gi, "")
     .replace(/기사 원문/gi, "")
     .replace(/더보기/gi, "")
-    .replace(/https?:\/\/\S+/g, "")
     .replace(/\s+/g, " ")
     .trim();
-
-  if (
-    titleText &&
-    text.toLowerCase().startsWith(titleText.toLowerCase())
-  ) {
-    text = text.slice(titleText.length).trim();
-  }
-
-  if (
-    sourceText &&
-    text.toLowerCase().startsWith(sourceText.toLowerCase())
-  ) {
-    text = text.slice(sourceText.length).trim();
-  }
-
-  text = text
-    .replace(/^[-–—|:·\s]+/, "")
-    .replace(/\s-\s[^-]{2,50}$/g, "")
-    .replace(/\[[^\]]+\]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (
-    !text ||
-    text.length < 15 ||
-    text.toLowerCase() === titleText.toLowerCase()
-  ) {
-    return "";
-  }
 
   if (text.length > 220) {
     text = text.slice(0, 220) + "...";
@@ -640,6 +686,7 @@ function removeDuplicates(items) {
     if (seen.has(key)) return false;
 
     seen.add(key);
+
     return true;
   });
 }
