@@ -467,25 +467,21 @@ function clean(text = "") {
 
   return value
     .replace(/<!\[CDATA\[|\]\]>/g, "")
+    .replace(/<li\b[^>]*>/gi, " ")
+    .replace(/<\/li>/gi, " ")
     .replace(/<a\b[^>]*>(.*?)<\/a>/gi, "$1")
     .replace(/<font\b[^>]*>(.*?)<\/font>/gi, "$1")
-    .replace(/<[^>]*>/g, "")
+    .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function makeReadableSummary(
-  description = "",
-  title = "",
-  source = ""
-) {
-  const raw = clean(description || "");
+function makeReadableSummary(description = "", title = "", source = "") {
+  let text = clean(description || "");
   const titleText = clean(title || "");
   const sourceText = clean(source || "");
 
-  let text = raw
-    .replace(titleText, "")
-    .replace(sourceText, "")
+  text = text
     .replace(/관련기사/gi, "")
     .replace(/Google 뉴스/gi, "")
     .replace(/Google News/gi, "")
@@ -493,55 +489,39 @@ function makeReadableSummary(
     .replace(/기사 원문/gi, "")
     .replace(/더보기/gi, "")
     .replace(/https?:\/\/\S+/g, "")
-    .replace(/\s-\s[^-]{2,40}$/g, "")
-    .replace(/\[[^\]]+\]/g, "")
-    .replace(/\([^)]+\)$/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
   if (
-    !text ||
-    text.length < 40 ||
-    /Google|뉴스|관련기사|전체 기사|기사 원문|더보기/i.test(text)
+    titleText &&
+    text.toLowerCase().startsWith(titleText.toLowerCase())
   ) {
-    text = makeSummaryFromTitle(titleText);
+    text = text.slice(titleText.length).trim();
   }
 
-  if (text.toLowerCase() === titleText.toLowerCase()) {
-    text = makeSummaryFromTitle(titleText);
+  if (
+    sourceText &&
+    text.toLowerCase().startsWith(sourceText.toLowerCase())
+  ) {
+    text = text.slice(sourceText.length).trim();
   }
 
-  if (text.length > 160) {
-    text = text.slice(0, 160) + "...";
+  text = text
+    .replace(/^[-–—|:·\s]+/, "")
+    .replace(/\s-\s[^-]{2,40}$/g, "")
+    .replace(/\[[^\]]+\]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!text || text.length < 20) {
+    return titleText || "기사 내용을 확인해 산업 흐름을 참고하세요.";
   }
 
-  return text || "산업 흐름 참고용 기사입니다.";
-}
-
-function makeSummaryFromTitle(title = "") {
-  const text = String(title || "");
-
-  if (/태양광|solar|photovoltaic|solar module|solar farm/i.test(text)) {
-    return "태양광 시장과 정책, 공급망 흐름 변화 가능성이 반영된 기사입니다.";
+  if (text.length > 220) {
+    text = text.slice(0, 220) + "...";
   }
 
-  if (/하이브|sm|jyp|yg|k-pop|kpop|콘서트|음원|팬덤|bts|blackpink|아이돌/i.test(text)) {
-    return "엔터 산업 내 팬덤·콘텐츠·글로벌 활동 흐름이 반영된 기사입니다.";
-  }
-
-  if (/반도체|hbm|gpu|엔비디아|nvidia|파운드리|tsmc|memory chip/i.test(text)) {
-    return "반도체 및 AI 인프라 시장 흐름 변화 가능성을 보여주는 기사입니다.";
-  }
-
-  if (/ai|llm|openai|anthropic|생성형|인공지능|gpu|ai agents/i.test(text)) {
-    return "AI 모델 경쟁과 인프라 투자 흐름 변화가 반영된 기사입니다.";
-  }
-
-  if (/전기차|ev|배터리|자율주행|테슬라|tesla|robotaxi/i.test(text)) {
-    return "모빌리티 산업의 수요와 기술 변화 흐름을 보여주는 기사입니다.";
-  }
-
-  return "산업 흐름 참고용 기사입니다.";
+  return text;
 }
 
 function detectCategory(text = "") {
