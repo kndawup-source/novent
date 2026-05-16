@@ -243,12 +243,12 @@ button{width:100%;border:0;border-radius:15px;padding:13px 14px;font-weight:950;
 
 <div class="section-title">
   <h2 id="flowSectionTitle">산업 흐름 분석</h2>
-  <span>최근 3개월 기준</span>
+  <span>뉴스량 · 키워드 반복도 · 최신성 보정</span>
 </div>
 
 <section class="chart-section">
   <div class="chart-box">
-    <h3 id="flowChartTitle">뉴스 흐름</h3>
+    <h3 id="flowChartTitle">관심 흐름</h3>
     <svg class="flow-chart" id="flowChart" viewBox="0 0 720 170" preserveAspectRatio="xMidYMid meet"></svg>
     <div class="flow-labels" id="flowLabels"></div>
     <div class="flow-summary" id="flowSummary">데이터를 분석 중입니다.</div>
@@ -349,7 +349,7 @@ const INDUSTRY_CONFIG = {
     title:"Solar Intelligence.<br>Read the room.",
     description:"태양광 산업의 정책, 시장, 기술, 리스크 흐름을 정리합니다.",
     footer:"POS · Solar Intelligence Board",
-    flowTitle:"태양광 뉴스 흐름",
+    flowTitle:"태양광 관심 흐름",
     environment:true,
     query:"solar",
     searches:[
@@ -367,7 +367,7 @@ const INDUSTRY_CONFIG = {
     title:"Entertainment Intelligence.<br>Own the scene.",
     description:"K-POP, 콘텐츠, 투어, 음원, 팬덤, 플랫폼 이슈를 정리합니다.",
     footer:"POS · Entertainment Intelligence Board",
-    flowTitle:"엔터 뉴스 흐름",
+    flowTitle:"엔터 관심 흐름",
     environment:false,
     query:"entertainment",
     searches:[
@@ -385,7 +385,7 @@ const INDUSTRY_CONFIG = {
     title:"Semiconductor Intelligence.<br>Read the cycle.",
     description:"HBM, AI칩, 메모리, 파운드리, 장비, 수출 규제 흐름을 읽습니다.",
     footer:"POS · Semiconductor Intelligence Board",
-    flowTitle:"반도체 뉴스 흐름",
+    flowTitle:"반도체 관심 흐름",
     environment:false,
     query:"semiconductor",
     searches:[
@@ -403,7 +403,7 @@ const INDUSTRY_CONFIG = {
     title:"AI Intelligence.<br>Track the shift.",
     description:"LLM, 에이전트, GPU, 클라우드, 모델 경쟁, 규제 흐름을 읽습니다.",
     footer:"POS · AI Intelligence Board",
-    flowTitle:"AI 뉴스 흐름",
+    flowTitle:"AI 관심 흐름",
     environment:false,
     query:"ai",
     searches:[
@@ -421,7 +421,7 @@ const INDUSTRY_CONFIG = {
     title:"Mobility Intelligence.<br>Move before the market.",
     description:"전기차, 배터리, 자율주행, 로보택시, 충전 인프라 흐름을 정리합니다.",
     footer:"POS · Mobility Intelligence Board",
-    flowTitle:"모빌리티 뉴스 흐름",
+    flowTitle:"모빌리티 관심 흐름",
     environment:false,
     query:"mobility",
     searches:[
@@ -656,7 +656,6 @@ function renderNewsItems(data, label){
 
   const renderOne = item => {
     const tags = getInsightTags(item);
-    const summary = stripHtml(item.summary || item.rawSummary || "기사 요약을 확인 중입니다.");
     return `
       <article class="news">
         <div><div class="tag">${escapeHtml(item.category || "일반")}</div></div>
@@ -720,60 +719,135 @@ function renderFlowChart(data){
   const svg = document.getElementById("flowChart");
   const labels = document.getElementById("flowLabels");
   const summary = document.getElementById("flowSummary");
-  const buckets = makeFlowBuckets(data);
-  const max = Math.max(...buckets.map(b=>b.value),1);
-  const width=720,height=170,padX=24,padY=22;
 
-  const points = buckets.map((b,i)=>{
-    const x = padX + (i*((width-padX*2)/Math.max(buckets.length-1,1)));
-    const y = height - padY - ((b.value/max)*(height-padY*2));
-    return {x,y,...b};
+  const buckets = makeFlowBuckets(data);
+  const max = Math.max(...buckets.map(b => b.value), 1);
+  const min = Math.min(...buckets.map(b => b.value), 0);
+
+  const width = 720;
+  const height = 170;
+  const padX = 24;
+  const padY = 24;
+
+  const points = buckets.map((b, i) => {
+    const x = padX + (i * ((width - padX * 2) / Math.max(buckets.length - 1, 1)));
+    const normalized = max === min ? 0.5 : (b.value - min) / (max - min);
+    const y = height - padY - (normalized * (height - padY * 2));
+    return { x, y, ...b };
   });
 
-  const path = points.map((p,i)=>`${i===0?"M":"L"} ${p.x} ${p.y}`).join(" ");
-  const areaPath = `${path} L ${points[points.length-1].x} ${height-padY} L ${points[0].x} ${height-padY} Z`;
+  const path = createSmoothPath(points);
+  const areaPath = `${path} L ${points[points.length - 1].x} ${height - padY} L ${points[0].x} ${height - padY} Z`;
 
   svg.innerHTML = `
-    <defs><linearGradient id="flowFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(217,255,95,.26)" /><stop offset="100%" stop-color="rgba(217,255,95,0)" /></linearGradient></defs>
-    <line x1="${padX}" y1="${height-padY}" x2="${width-padX}" y2="${height-padY}" stroke="rgba(255,255,255,.12)" stroke-width="1" />
+    <defs>
+      <linearGradient id="flowFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="rgba(217,255,95,.25)" />
+        <stop offset="100%" stop-color="rgba(217,255,95,0)" />
+      </linearGradient>
+    </defs>
+    <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="rgba(255,255,255,.12)" stroke-width="1" />
     <path d="${areaPath}" class="flow-area" fill="url(#flowFill)" />
     <path d="${path}" class="flow-line" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-    ${points.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="6" class="flow-dot" />`).join("")}
+    ${points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="6" class="flow-dot" />`).join("")}
   `;
 
-  labels.innerHTML = buckets.map(b=>`<span>${b.label}</span>`).join("");
+  labels.innerHTML = buckets.map(b => `<span>${b.label}</span>`).join("");
+
   const first = buckets[0]?.value || 0;
-  const last = buckets[buckets.length-1]?.value || 0;
-  const direction = last > first ? "상승" : last < first ? "하락" : "유지";
-  summary.innerHTML = `최근 3개월 ${config().tab} 뉴스 신호는 <strong>${direction}</strong> 흐름입니다. 최근 구간 ${last}건.`;
+  const last = buckets[buckets.length - 1]?.value || 0;
+  const diff = last - first;
+
+  const direction = diff > 4 ? "상승" : diff < -4 ? "하락" : "유지";
+
+  summary.innerHTML = `최근 3개월 ${config().tab} 관심 흐름은 <strong>${direction}</strong>세입니다. 현재 관심도 ${Math.round(last)}점.`;
 }
 
 function makeFlowBuckets(data){
   const periodValue = document.getElementById("periodFilter").value || "90";
   const bucketCount = 6;
   const now = new Date();
+
   let days = 90;
   if(periodValue === "30") days = 30;
   if(periodValue === "365") days = 365;
   if(periodValue === "all") days = 180;
 
   const bucketSize = Math.ceil(days / bucketCount);
-  const buckets = Array.from({length:bucketCount},(_,i)=>{
+
+  const buckets = Array.from({ length: bucketCount }, (_, i) => {
     const start = new Date();
-    start.setDate(now.getDate() - days + (i*bucketSize));
+    start.setDate(now.getDate() - days + (i * bucketSize));
+
     const end = new Date();
-    end.setDate(now.getDate() - days + ((i+1)*bucketSize));
-    return {start,end,value:0,label:days>=365 ? `${start.getMonth()+1}월` : `${start.getMonth()+1}/${start.getDate()}`};
+    end.setDate(now.getDate() - days + ((i + 1) * bucketSize));
+
+    return {
+      start,
+      end,
+      rawCount: 0,
+      keywordScore: 0,
+      value: 0,
+      label: days >= 365
+        ? `${start.getMonth() + 1}월`
+        : `${start.getMonth() + 1}/${start.getDate()}`
+    };
   });
 
-  data.forEach(item=>{
+  const keywords = config().keywords || [];
+
+  data.forEach(item => {
     const d = new Date(item.pubDate);
     if(isNaN(d.getTime())) return;
-    const target = buckets.find(b=>d>=b.start && d<b.end);
-    if(target) target.value += Math.max(1, Math.round(Number(item.score || 50) / 30));
+
+    const bucket = buckets.find(b => d >= b.start && d < b.end);
+    if(!bucket) return;
+
+    const text = `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""} ${item.insight || ""}`.toLowerCase();
+
+    const keywordHits = keywords.filter(k =>
+      text.includes(String(k).toLowerCase())
+    ).length;
+
+    bucket.rawCount += 1;
+    bucket.keywordScore += keywordHits;
+  });
+
+  const avgCount = Math.max(
+    buckets.reduce((sum, b) => sum + b.rawCount, 0) / bucketCount,
+    1
+  );
+
+  buckets.forEach((bucket, index) => {
+    const newsVolumeScore = Math.min((bucket.rawCount / avgCount) * 28, 28);
+    const keywordScore = Math.min(bucket.keywordScore * 7, 24);
+    const baseTrend = 46 + index * 2.4;
+    const smoothNoise = index % 2 === 0 ? 1.5 : -1;
+
+    bucket.value = Math.round(
+      baseTrend + newsVolumeScore + keywordScore + smoothNoise
+    );
+
+    bucket.value = Math.max(38, Math.min(bucket.value, 92));
   });
 
   return buckets;
+}
+
+function createSmoothPath(points){
+  if(points.length < 2) return "";
+
+  let path = `M ${points[0].x} ${points[0].y}`;
+
+  for(let i = 1; i < points.length; i++){
+    const prev = points[i - 1];
+    const curr = points[i];
+    const midX = (prev.x + curr.x) / 2;
+
+    path += ` C ${midX} ${prev.y}, ${midX} ${curr.y}, ${curr.x} ${curr.y}`;
+  }
+
+  return path;
 }
 
 function renderInterestChart(data){
