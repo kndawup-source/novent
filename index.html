@@ -663,7 +663,6 @@ function renderNewsItems(data, label){
         <div>
           <h3><a class="headline-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(stripHtml(item.title))}</a></h3>
           <div class="news-summary">
-            <p>${escapeHtml(summary)}</p>
             <p class="date-text">${escapeHtml(item.source || "")} · ${formatDate(item.pubDate)}</p>
           </div>
           <div class="insight-tags">${tags.map(tag=>`<span>${escapeHtml(tag)}</span>`).join("")}</div>
