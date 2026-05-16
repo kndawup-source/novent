@@ -83,30 +83,124 @@ function toSpaceQuery(query = "") {
     .trim();
 }
 
+function toGoogleOrQuery(query = "") {
+  const parts = expandQueries(query).slice(0, 10);
+
+  if (parts.length <= 1) {
+    return toSpaceQuery(query) || "산업 뉴스";
+  }
+
+  return parts.map(item => `"${item}"`).join(" OR ");
+}
+
 function toGlobalQuery(query = "") {
   const raw = String(query || "").toLowerCase();
 
-  if (/엔터|kpop|케이팝|하이브|음원|콘서트|팬덤|sm|yg|jyp/.test(raw)) {
-    return "K-pop OR entertainment industry OR music streaming OR concert tour OR fandom OR HYBE OR SM Entertainment OR JYP Entertainment";
+  if (/엔터|kpop|케이팝|k팝|하이브|에스엠|음원|콘서트|팬덤|sm|yg|jyp/.test(raw)) {
+    return `"K-pop" OR "Korean entertainment" OR "music streaming" OR "concert tour" OR fandom OR HYBE OR "SM Entertainment" OR "JYP Entertainment" OR "YG Entertainment"`;
   }
 
   if (/반도체|hbm|ai칩|파운드리|메모리|삼성전자|하이닉스/.test(raw)) {
-    return "semiconductor OR HBM OR AI chip OR foundry OR memory chip OR NVIDIA OR TSMC OR Samsung Electronics";
+    return `semiconductor OR HBM OR "AI chip" OR foundry OR "memory chip" OR NVIDIA OR TSMC OR "Samsung Electronics" OR "SK Hynix"`;
   }
 
   if (/ai|인공지능|llm|생성형|openai|anthropic|gpu/.test(raw)) {
-    return "artificial intelligence OR generative AI OR LLM OR OpenAI OR Anthropic OR GPU OR AI agents";
+    return `"artificial intelligence" OR "generative AI" OR LLM OR OpenAI OR Anthropic OR GPU OR "AI agents"`;
   }
 
   if (/전기차|배터리|자율주행|로보택시|테슬라|현대차|mobility/.test(raw)) {
-    return "electric vehicle OR EV battery OR autonomous driving OR robotaxi OR Tesla OR mobility industry";
+    return `"electric vehicle" OR "EV battery" OR "autonomous driving" OR robotaxi OR Tesla OR "mobility industry"`;
   }
 
   if (/태양광|재생에너지|rec|smp|ess|solar/.test(raw)) {
-    return "solar industry OR photovoltaic OR renewable energy OR energy storage OR solar supply chain";
+    return `"solar industry" OR photovoltaic OR "renewable energy" OR "energy storage" OR "solar supply chain"`;
   }
 
   return query;
+}
+
+function expandQueries(query = "") {
+  const raw = String(query || "").trim();
+  const low = raw.toLowerCase();
+
+  if (/엔터|kpop|케이팝|k팝|하이브|에스엠|jyp|yg|음원|콘서트|팬덤/.test(low)) {
+    return [
+      "하이브",
+      "에스엠",
+      "SM엔터테인먼트",
+      "JYP엔터",
+      "YG엔터테인먼트",
+      "케이팝",
+      "K팝",
+      "엔터테인먼트",
+      "콘서트",
+      "음원",
+      "팬덤",
+      "월드투어"
+    ];
+  }
+
+  if (/반도체|hbm|ai칩|파운드리|메모리|삼성전자|하이닉스/.test(low)) {
+    return [
+      "HBM",
+      "AI 반도체",
+      "엔비디아",
+      "파운드리",
+      "삼성전자 반도체",
+      "SK하이닉스",
+      "메모리 반도체",
+      "TSMC",
+      "반도체 수출규제",
+      "반도체 장비"
+    ];
+  }
+
+  if (/ai|인공지능|llm|생성형|openai|anthropic|gpu/.test(low)) {
+    return [
+      "생성형 AI",
+      "LLM",
+      "OpenAI",
+      "Anthropic",
+      "GPU",
+      "AI 에이전트",
+      "인공지능",
+      "AI 데이터센터",
+      "AI 규제"
+    ];
+  }
+
+  if (/전기차|배터리|자율주행|로보택시|테슬라|현대차|mobility/.test(low)) {
+    return [
+      "전기차",
+      "테슬라",
+      "현대차",
+      "자율주행",
+      "로보택시",
+      "배터리",
+      "EV",
+      "충전 인프라",
+      "전기차 보조금"
+    ];
+  }
+
+  if (/태양광|재생에너지|rec|smp|ess|solar/.test(low)) {
+    return [
+      "태양광",
+      "재생에너지",
+      "REC",
+      "SMP",
+      "ESS",
+      "전력시장",
+      "태양광 정책",
+      "계통 접속",
+      "태양광 화재"
+    ];
+  }
+
+  return raw
+    .split(/\s+OR\s+|\s*\|\s*/i)
+    .map(v => v.replace(/[()"]/g, "").trim())
+    .filter(Boolean);
 }
 
 async function fetchNaverNews(query) {
@@ -115,59 +209,65 @@ async function fetchNaverNews(query) {
 
   if (!NAVER_ID || !NAVER_SECRET) return [];
 
-  try {
-    const naverQuery = toSpaceQuery(query);
+  const queries = expandQueries(query).slice(0, 12);
 
-    const url =
-      "https://openapi.naver.com/v1/search/news.json?" +
-      new URLSearchParams({
-        query: naverQuery || "산업 뉴스",
-        display: "50",
-        sort: "date"
-      });
+  const results = await Promise.all(
+    queries.map(async q => {
+      try {
+        const url =
+          "https://openapi.naver.com/v1/search/news.json?" +
+          new URLSearchParams({
+            query: q,
+            display: "20",
+            sort: "date"
+          });
 
-    const response = await fetch(url, {
-      headers: {
-        "X-Naver-Client-Id": NAVER_ID,
-        "X-Naver-Client-Secret": NAVER_SECRET
+        const response = await fetch(url, {
+          headers: {
+            "X-Naver-Client-Id": NAVER_ID,
+            "X-Naver-Client-Secret": NAVER_SECRET
+          }
+        });
+
+        if (!response.ok) return [];
+
+        const data = await response.json();
+
+        return (data.items || []).map(item => {
+          const title = clean(item.title);
+          const rawSummary = clean(item.description);
+          const text = `${title} ${rawSummary}`;
+
+          return {
+            sourceType: "naver",
+            source: "Naver",
+            title,
+            rawSummary,
+            summary: makeReadableSummary(rawSummary, title, "Naver"),
+            link: item.originallink || item.link,
+            pubDate: item.pubDate,
+            category: detectCategory(text),
+            score: makeScore(text),
+            insight: makeInsight(text)
+          };
+        });
+      } catch {
+        return [];
       }
-    });
+    })
+  );
 
-    if (!response.ok) return [];
-
-    const data = await response.json();
-
-    return (data.items || []).map(item => {
-      const title = clean(item.title);
-      const rawSummary = clean(item.description);
-      const text = `${title} ${rawSummary}`;
-
-      return {
-        sourceType: "naver",
-        source: "Naver",
-        title,
-        rawSummary,
-        summary: makeReadableSummary(rawSummary, title, "Naver"),
-        link: item.originallink || item.link,
-        pubDate: item.pubDate,
-        category: detectCategory(text),
-        score: makeScore(text),
-        insight: makeInsight(text)
-      };
-    });
-  } catch {
-    return [];
-  }
+  return results.flat();
 }
 
 async function fetchGoogleNews(query, period) {
   try {
-    const cleanQuery = toSpaceQuery(query);
+    const googleQuery = toGoogleOrQuery(query);
 
     const periodQuery =
       period && period !== "all"
-        ? `${cleanQuery || "산업 뉴스"} when:${period}d`
-        : cleanQuery || "산업 뉴스";
+        ? `${googleQuery} when:${period}d`
+        : googleQuery;
 
     const url =
       "https://news.google.com/rss/search?" +
@@ -360,7 +460,7 @@ function makeScore(text = "") {
   const value = String(text).toLowerCase();
   let score = 45;
 
-  if (/태양광|solar|photovoltaic|pv|엔터|kpop|케이팝|반도체|ai|전기차|배터리/.test(value)) score += 8;
+  if (/태양광|solar|photovoltaic|pv|엔터|kpop|케이팝|k팝|반도체|ai|전기차|배터리/.test(value)) score += 8;
   if (/정책|정부|보조금|규제|policy|subsidy|regulation|ira/.test(value)) score += 10;
   if (/시장|가격|수익|실적|투자|market|price|earnings|investment/.test(value)) score += 10;
   if (/기술|hbm|gpu|ess|ai|배터리|technology|chip|storage|model/.test(value)) score += 10;
