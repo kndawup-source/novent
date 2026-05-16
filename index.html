@@ -347,17 +347,17 @@ const INDUSTRY_CONFIG = {
   solar:{
     tab:"Solar",
     title:"Solar Intelligence.<br>Read the room.",
-    description:"POS는 산업별 시장 신호를 읽는 인텔리전스 보드입니다. 이 페이지는 태양광 산업의 정책, 시장, 기술, 리스크 흐름을 정리합니다.",
+    description:"태양광 산업의 정책, 시장, 기술, 리스크 흐름을 정리합니다.",
     footer:"POS · Solar Intelligence Board",
     flowTitle:"태양광 뉴스 흐름",
     environment:true,
-    query:"태양광 OR 재생에너지 OR REC OR SMP OR ESS",
+    query:"solar",
     searches:[
-      ["전체 흐름","태양광 OR 재생에너지 OR REC OR SMP OR ESS"],
-      ["정책 변화","태양광 정책 OR 재생에너지 정책 OR 산업부 태양광 OR 보조금"],
-      ["REC/SMP","REC OR SMP OR 전력시장 OR 전력거래 OR 태양광 수익"],
-      ["ESS·기술","ESS OR 배터리 OR 전력저장 OR 인버터 OR 태양광 기술"],
-      ["계통 리스크","계통 OR 접속지연 OR 송전 OR 배전 OR 태양광"]
+      ["전체 흐름","solar"],
+      ["정책 변화","solar_policy"],
+      ["REC/SMP","solar_market"],
+      ["ESS·기술","solar_tech"],
+      ["계통 리스크","solar_risk"]
     ],
     keywords:["정책","REC","SMP","ESS","인버터","계통","리스크","투자"],
     tags:["정책","수익성","ESS","계통","안전","사업기회","글로벌"]
@@ -365,17 +365,17 @@ const INDUSTRY_CONFIG = {
   entertainment:{
     tab:"Entertainment",
     title:"Entertainment Intelligence.<br>Own the scene.",
-    description:"K-POP, 콘텐츠, 투어, 음원, 팬덤, 플랫폼 이슈를 한 화면에서 읽는 엔터 산업 인텔리전스 보드입니다.",
+    description:"K-POP, 콘텐츠, 투어, 음원, 팬덤, 플랫폼 이슈를 정리합니다.",
     footer:"POS · Entertainment Intelligence Board",
     flowTitle:"엔터 뉴스 흐름",
     environment:false,
-    query:"엔터 OR KPOP OR 케이팝 OR 콘서트 OR 음원 OR 팬덤 OR 하이브 OR SM OR YG",
+    query:"entertainment",
     searches:[
-      ["전체 흐름","엔터 OR KPOP OR 케이팝 OR 콘서트 OR 음원 OR 팬덤 OR 하이브 OR SM OR YG"],
-      ["컴백·투어","컴백 OR 콘서트 OR 월드투어 OR 팬미팅"],
-      ["음원·차트","음원 OR 빌보드 OR 멜론 OR 스포티파이 OR 유튜브"],
-      ["팬덤·플랫폼","팬덤 OR 위버스 OR 버블 OR 틱톡"],
-      ["리스크","엔터 리스크 OR 계약 OR 소송 OR 논란"]
+      ["전체 흐름","entertainment"],
+      ["컴백·투어","entertainment_tour"],
+      ["음원·차트","entertainment_music"],
+      ["팬덤·플랫폼","entertainment_fandom"],
+      ["리스크","entertainment_risk"]
     ],
     keywords:["컴백","투어","음원","팬덤","틱톡","굿즈","계약","리스크"],
     tags:["컴백","투어","음원","팬덤","플랫폼","리스크","글로벌"]
@@ -383,17 +383,17 @@ const INDUSTRY_CONFIG = {
   semiconductor:{
     tab:"Semiconductor",
     title:"Semiconductor Intelligence.<br>Read the cycle.",
-    description:"HBM, AI칩, 메모리, 파운드리, 장비, 수출 규제 흐름을 읽는 반도체 산업 인텔리전스 보드입니다.",
+    description:"HBM, AI칩, 메모리, 파운드리, 장비, 수출 규제 흐름을 읽습니다.",
     footer:"POS · Semiconductor Intelligence Board",
     flowTitle:"반도체 뉴스 흐름",
     environment:false,
-    query:"반도체 OR HBM OR AI칩 OR 파운드리 OR 메모리 OR 삼성전자 OR SK하이닉스",
+    query:"semiconductor",
     searches:[
-      ["전체 흐름","반도체 OR HBM OR AI칩 OR 파운드리 OR 메모리"],
-      ["HBM·AI칩","HBM OR AI칩 OR GPU OR 엔비디아"],
-      ["메모리","D램 OR 낸드 OR 메모리 반도체"],
-      ["파운드리","파운드리 OR TSMC OR 삼성 파운드리"],
-      ["규제·공급망","반도체 수출규제 OR 공급망 OR 미국 중국 반도체"]
+      ["전체 흐름","semiconductor"],
+      ["HBM·AI칩","semiconductor_hbm"],
+      ["메모리","semiconductor_memory"],
+      ["파운드리","semiconductor_foundry"],
+      ["규제·공급망","semiconductor_risk"]
     ],
     keywords:["HBM","AI칩","GPU","메모리","파운드리","수출","공급망","장비"],
     tags:["HBM","AI칩","메모리","파운드리","공급망","규제","투자"]
@@ -401,17 +401,17 @@ const INDUSTRY_CONFIG = {
   ai:{
     tab:"AI",
     title:"AI Intelligence.<br>Track the shift.",
-    description:"LLM, 에이전트, GPU, 클라우드, 모델 경쟁, 규제 흐름을 읽는 AI 산업 인텔리전스 보드입니다.",
+    description:"LLM, 에이전트, GPU, 클라우드, 모델 경쟁, 규제 흐름을 읽습니다.",
     footer:"POS · AI Intelligence Board",
     flowTitle:"AI 뉴스 흐름",
     environment:false,
-    query:"AI OR 인공지능 OR LLM OR 생성형AI OR GPU OR OpenAI OR Anthropic",
+    query:"ai",
     searches:[
-      ["전체 흐름","AI OR 인공지능 OR LLM OR 생성형AI OR GPU"],
-      ["모델·서비스","LLM OR OpenAI OR Anthropic OR Gemini OR Claude"],
-      ["GPU·인프라","GPU OR 엔비디아 OR 데이터센터 OR 클라우드"],
-      ["AI 에이전트","AI 에이전트 OR 자동화 OR 업무AI"],
-      ["규제","AI 규제 OR 저작권 OR 개인정보 OR 안전"]
+      ["전체 흐름","ai"],
+      ["모델·서비스","ai_model"],
+      ["GPU·인프라","ai_gpu"],
+      ["AI 에이전트","ai_agent"],
+      ["규제","ai_risk"]
     ],
     keywords:["LLM","GPU","에이전트","데이터센터","클라우드","규제","모델","자동화"],
     tags:["LLM","GPU","에이전트","인프라","규제","투자","생산성"]
@@ -419,17 +419,17 @@ const INDUSTRY_CONFIG = {
   mobility:{
     tab:"Mobility",
     title:"Mobility Intelligence.<br>Move before the market.",
-    description:"전기차, 배터리, 자율주행, 로보택시, 충전 인프라와 글로벌 완성차 흐름을 정리합니다.",
+    description:"전기차, 배터리, 자율주행, 로보택시, 충전 인프라 흐름을 정리합니다.",
     footer:"POS · Mobility Intelligence Board",
     flowTitle:"모빌리티 뉴스 흐름",
     environment:false,
-    query:"전기차 OR 배터리 OR 자율주행 OR 로보택시 OR 테슬라 OR 현대차",
+    query:"mobility",
     searches:[
-      ["전체 흐름","전기차 OR 배터리 OR 자율주행 OR 로보택시 OR 테슬라"],
-      ["전기차","전기차 OR EV OR 현대차 OR 테슬라"],
-      ["배터리","배터리 OR 리튬 OR LFP OR 전고체"],
-      ["자율주행","자율주행 OR 로보택시 OR ADAS"],
-      ["충전·인프라","충전소 OR 충전 인프라 OR 전기차 보조금"]
+      ["전체 흐름","mobility"],
+      ["전기차","mobility_ev"],
+      ["배터리","mobility_battery"],
+      ["자율주행","mobility_auto"],
+      ["충전·인프라","mobility_charge"]
     ],
     keywords:["전기차","배터리","자율주행","로보택시","충전","리튬","보조금","테슬라"],
     tags:["전기차","배터리","자율주행","충전","정책","리스크","글로벌"]
@@ -438,16 +438,12 @@ const INDUSTRY_CONFIG = {
 
 let currentIndustry = "solar";
 let newsData = [];
-let currentSignal = null;
 let openedNewsGroups = { domesticMore:false, globalMore:false };
 
-function config(){
-  return INDUSTRY_CONFIG[currentIndustry];
-}
+function config(){ return INDUSTRY_CONFIG[currentIndustry]; }
 
 function initIndustryTabs(){
-  const wrap = document.getElementById("industryTabs");
-  wrap.innerHTML = Object.entries(INDUSTRY_CONFIG).map(([key,item]) => `
+  document.getElementById("industryTabs").innerHTML = Object.entries(INDUSTRY_CONFIG).map(([key,item]) => `
     <button class="${key === currentIndustry ? "active" : ""}" onclick="switchIndustry('${key}')">${item.tab}</button>
   `).join("");
 }
@@ -463,65 +459,41 @@ function switchIndustry(key){
 
 function applyIndustryConfig(){
   const c = config();
-
   document.getElementById("heroTitle").innerHTML = c.title;
   document.getElementById("heroDescription").textContent = c.description;
   document.getElementById("footerText").textContent = c.footer;
   document.getElementById("flowChartTitle").textContent = c.flowTitle;
 
   const quick = document.getElementById("quickSearch");
-  quick.innerHTML = c.searches.map(item => `
-    <option value="${escapeHtml(item[1])}">${escapeHtml(item[0])}</option>
-  `).join("");
+  quick.innerHTML = c.searches.map(item => `<option value="${escapeHtml(item[1])}">${escapeHtml(item[0])}</option>`).join("");
   quick.value = c.query;
 
-  const envBox = document.getElementById("environmentBox");
-  envBox.style.display = c.environment ? "block" : "none";
+  document.getElementById("environmentBox").style.display = c.environment ? "block" : "none";
 }
 
 async function loadStocks(){
   const wrap = document.getElementById("stockStrip");
-  if(!wrap) return;
-
   try{
     const response = await fetch(`/api/stocks?industry=${encodeURIComponent(currentIndustry)}`);
     const data = await response.json();
-
-    if(!data.ok || !Array.isArray(data.items) || data.items.length === 0){
-      throw new Error("주가 데이터 없음");
-    }
-
+    if(!data.ok || !Array.isArray(data.items) || data.items.length === 0) throw new Error();
     renderStocks(data.items);
-  }catch(error){
-    wrap.innerHTML = `
-      <div class="stock-card">
-        <small>증시·관련주 흐름</small>
-        <strong>확인 필요</strong>
-        <span>주가 데이터를 불러오지 못했습니다.</span>
-      </div>
-    `;
+  }catch{
+    wrap.innerHTML = `<div class="stock-card"><small>증시·관련주 흐름</small><strong>확인 필요</strong><span>주가 데이터를 불러오지 못했습니다.</span></div>`;
   }
 }
 
 function renderStocks(items){
   const wrap = document.getElementById("stockStrip");
-  if(!wrap) return;
-
-  const groupOrder = {
-    "국내 증시":1,"국내 관련주":2,
-    "미국 증시":3,"미국 관련주":4,
-    "중국 증시":5,"중국 관련주":6,
-    "글로벌 증시":7,"글로벌 관련주":8
-  };
-
-  const sorted = [...items].sort((a,b) => (groupOrder[a.group] || 99) - (groupOrder[b.group] || 99));
-  const firstItems = sorted.slice(0, 3);
+  const groupOrder = {"국내 증시":1,"국내 관련주":2,"미국 증시":3,"미국 관련주":4,"중국 증시":5,"중국 관련주":6};
+  const sorted = [...items].sort((a,b)=>(groupOrder[a.group]||99)-(groupOrder[b.group]||99));
+  const firstItems = sorted.slice(0,3);
   const moreItems = sorted.slice(3);
 
   const flag = item => {
-    if((item.group || "").includes("국내")) return "🇰🇷";
-    if((item.group || "").includes("미국")) return "🇺🇸";
-    if((item.group || "").includes("중국")) return "🇨🇳";
+    if((item.group||"").includes("국내")) return "🇰🇷";
+    if((item.group||"").includes("미국")) return "🇺🇸";
+    if((item.group||"").includes("중국")) return "🇨🇳";
     return "🌐";
   };
 
@@ -529,7 +501,6 @@ function renderStocks(items){
     const up = item.direction === "up";
     const isKRStock = item.symbol?.includes(".KS") || item.symbol?.includes(".KQ");
     const isIndex = item.symbol?.startsWith("^") || item.symbol?.includes(".SS");
-
     return `
       <div class="stock-card ${up ? "up" : "down"}">
         <small>${flag(item)} ${escapeHtml(item.group)} · ${escapeHtml(item.name)}</small>
@@ -542,18 +513,7 @@ function renderStocks(items){
 
   wrap.innerHTML = `
     ${firstItems.map(renderOne).join("")}
-    ${
-      moreItems.length
-        ? `
-          <div id="stockMore" class="stock-more">
-            ${moreItems.map(renderOne).join("")}
-          </div>
-          <button class="sub-btn stock-more-btn" onclick="toggleStockMore(this)">
-            증시 더보기 ${moreItems.length}개
-          </button>
-        `
-        : ""
-    }
+    ${moreItems.length ? `<div id="stockMore" class="stock-more">${moreItems.map(renderOne).join("")}</div><button class="sub-btn stock-more-btn" onclick="toggleStockMore(this)">증시 더보기 ${moreItems.length}개</button>` : ""}
   `;
 }
 
@@ -565,7 +525,7 @@ function toggleStockMore(button){
 }
 
 async function loadNews(){
-  const keyword = document.getElementById("quickSearch").value || config().query;
+  const topic = document.getElementById("quickSearch").value || config().query;
   const period = document.getElementById("periodFilter").value;
   const status = document.getElementById("status");
 
@@ -573,34 +533,33 @@ async function loadNews(){
   status.textContent = "실제 뉴스를 수집하고 분석 중입니다...";
 
   try{
-    const response = await fetch(`/api/news?q=${encodeURIComponent(keyword)}&period=${encodeURIComponent(period)}`);
+    const response = await fetch(`/api/news?industry=${encodeURIComponent(currentIndustry)}&topic=${encodeURIComponent(topic)}&period=${encodeURIComponent(period)}&debug=1`);
     const data = await response.json();
-
     if(!data.ok) throw new Error(data.message || "뉴스 호출 실패");
 
-    newsData = data.articles || [];
-    currentSignal = data.signal || null;
+    newsData = (data.articles || []).filter(item => item.industry === currentIndustry);
 
-    renderSignal(currentSignal);
+    renderSignal(data.signal, data.debug);
     render();
 
-    status.textContent = `총 ${newsData.length}개 산업 신호를 분석했습니다.`;
-  }catch(error){
-    status.textContent = "실제 뉴스를 불러오지 못했습니다. /api/news 경로와 환경변수를 확인해주세요.";
+    status.textContent = `총 ${newsData.length}개 산업 신호를 분석했습니다. 국내 ${data.debug?.domesticCount || 0}개 · 해외 ${data.debug?.globalCount || 0}개`;
+  }catch{
+    status.textContent = "뉴스를 불러오지 못했습니다. /api/news 경로와 환경변수를 확인해주세요.";
     newsData = [];
-    currentSignal = null;
     renderSignal(null);
     render();
   }
 }
 
-function renderSignal(signal){
+function renderSignal(signal, debug){
   const box = document.getElementById("signalBox");
   if(!signal){
     box.textContent = "아직 분석된 실제 뉴스 데이터가 없습니다.";
     return;
   }
-  box.textContent = signal.summary || "시장 흐름을 분석 중입니다.";
+  box.textContent = debug
+    ? `${signal.summary} 국내 ${debug.domesticCount || 0}개, 해외 ${debug.globalCount || 0}개를 분석했습니다.`
+    : signal.summary;
 }
 
 function getFilteredData(){
@@ -623,32 +582,26 @@ function getFilteredData(){
 
   if(category !== "all") filtered = filtered.filter(item => item.category === category);
 
-  if(sort === "latest") filtered.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
-  else if(sort === "main") filtered.sort((a,b) => getMainNewsScore(b) - getMainNewsScore(a));
-  else filtered.sort((a,b) => Number(b.score || 0) - Number(a.score || 0));
+  if(sort === "latest") filtered.sort((a,b)=>new Date(b.pubDate)-new Date(a.pubDate));
+  else if(sort === "main") filtered.sort((a,b)=>getMainNewsScore(b)-getMainNewsScore(a));
+  else filtered.sort((a,b)=>Number(b.score||0)-Number(a.score||0));
 
-  return filtered.slice(0,50);
+  return filtered.slice(0,60);
 }
 
 function getKeywordTrendData(){
-  const category = document.getElementById("categoryFilter").value;
   const fromDate = new Date();
   fromDate.setDate(new Date().getDate() - 30);
-
-  let filtered = [...newsData].filter(item => {
+  return newsData.filter(item => {
     const d = new Date(item.pubDate);
     if(isNaN(d.getTime())) return true;
     return d >= fromDate;
   });
-
-  if(category !== "all") filtered = filtered.filter(item => item.category === category);
-  return filtered;
 }
 
 function render(){
   const filtered = getFilteredData();
   const keywordData = getKeywordTrendData();
-
   renderStats(filtered);
   renderNews(filtered);
   renderKeywordBars(keywordData);
@@ -660,61 +613,43 @@ function render(){
 
 function renderStats(data){
   document.getElementById("totalCount").textContent = data.length;
-  document.getElementById("policyCount").textContent = data.filter(n => n.category === "정책").length;
-  document.getElementById("riskScore").textContent = data.filter(n => n.category === "리스크").length;
-
-  const avg = data.length ? Math.round(data.reduce((sum,n)=>sum + Number(n.score || 0),0) / data.length) : 0;
+  document.getElementById("policyCount").textContent = data.filter(n=>n.category==="정책").length;
+  document.getElementById("riskScore").textContent = data.filter(n=>n.category==="리스크").length;
+  const avg = data.length ? Math.round(data.reduce((s,n)=>s+Number(n.score||0),0)/data.length) : 0;
   document.getElementById("marketScore").textContent = avg + "%";
   document.getElementById("heroMarketScore").textContent = avg + "%";
 }
 
 function getMainNewsScore(item){
   let score = Number(item.score || 0);
-  const text = `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""} ${item.insight || ""}`;
-  const c = config();
-
-  c.keywords.forEach(k => {
-    if(text.includes(k)) score += 7;
-  });
-
+  const text = `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""} ${item.insight || ""}`.toLowerCase();
+  config().keywords.forEach(k => { if(text.includes(k.toLowerCase())) score += 7; });
   if(item.sourceType === "naver") score += 8;
-
+  if(item.sourceType === "global") score += 5;
   const d = new Date(item.pubDate);
   if(!isNaN(d.getTime())){
-    const days = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
+    const days = (Date.now() - d.getTime()) / 86400000;
     if(days <= 7) score += 10;
     else if(days <= 30) score += 6;
     else if(days <= 90) score += 2;
   }
-
   return score;
 }
 
 function renderNews(data){
-  const domesticList = document.getElementById("domesticNewsList");
-  const globalList = document.getElementById("globalNewsList");
   const domestic = data.filter(item => item.sourceType !== "global");
   const global = data.filter(item => item.sourceType === "global");
-
-  domesticList.innerHTML = renderNewsItems(domestic, "국내");
-  globalList.innerHTML = renderNewsItems(global, "해외");
+  document.getElementById("domesticNewsList").innerHTML = renderNewsItems(domestic, "국내");
+  document.getElementById("globalNewsList").innerHTML = renderNewsItems(global, "해외");
 }
 
 function renderNewsItems(data, label){
   if(data.length === 0){
-    return `
-      <div class="news">
-        <div class="tag">안내</div>
-        <div>
-          <h3>${label} 기사가 없습니다</h3>
-          <p>검색어 또는 기간을 변경해보세요.</p>
-        </div>
-      </div>
-    `;
+    return `<div class="news"><div class="tag">안내</div><div><h3>${label} 기사가 없습니다</h3><p>검색어 또는 기간을 변경해보세요.</p></div></div>`;
   }
 
   const groupId = label === "국내" ? "domesticMore" : "globalMore";
-  const firstCount = label === "국내" ? 7 : 3;
+  const firstCount = label === "국내" ? 7 : 5;
   const firstItems = data.slice(0, firstCount);
   const moreItems = data.slice(firstCount);
   const isOpen = openedNewsGroups[groupId];
@@ -722,23 +657,16 @@ function renderNewsItems(data, label){
   const renderOne = item => {
     const tags = getInsightTags(item);
     const summary = stripHtml(item.summary || item.rawSummary || "기사 요약을 확인 중입니다.");
-
     return `
       <article class="news">
         <div><div class="tag">${escapeHtml(item.category || "일반")}</div></div>
         <div>
-          <h3>
-            <a class="headline-link" href="${item.link}" target="_blank" rel="noopener">
-              ${escapeHtml(stripHtml(item.title))}
-            </a>
-          </h3>
+          <h3><a class="headline-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(stripHtml(item.title))}</a></h3>
           <div class="news-summary">
             <p>${escapeHtml(summary)}</p>
-            <p class="date-text">${formatDate(item.pubDate)}</p>
+            <p class="date-text">${escapeHtml(item.source || "")} · ${formatDate(item.pubDate)}</p>
           </div>
-          <div class="insight-tags">
-            ${tags.map(tag => `<span>${escapeHtml(tag)}</span>`).join("")}
-          </div>
+          <div class="insight-tags">${tags.map(tag=>`<span>${escapeHtml(tag)}</span>`).join("")}</div>
         </div>
       </article>
     `;
@@ -746,46 +674,26 @@ function renderNewsItems(data, label){
 
   return `
     ${firstItems.map(renderOne).join("")}
-    ${
-      moreItems.length
-        ? `
-          <div id="${groupId}" class="more-news ${isOpen ? "open" : ""}">
-            ${moreItems.map(renderOne).join("")}
-          </div>
-          <button class="sub-btn more-btn" onclick="toggleMoreNews('${groupId}', this)">
-            ${isOpen ? "접기" : `${label} 기사 더보기 ${moreItems.length}개`}
-          </button>
-        `
-        : ""
-    }
+    ${moreItems.length ? `<div id="${groupId}" class="more-news ${isOpen ? "open" : ""}">${moreItems.map(renderOne).join("")}</div><button class="sub-btn more-btn" onclick="toggleMoreNews('${groupId}', this)">${isOpen ? "접기" : `${label} 기사 더보기 ${moreItems.length}개`}</button>` : ""}
   `;
 }
 
 function toggleMoreNews(id, button){
   const target = document.getElementById(id);
   if(!target) return;
-
   openedNewsGroups[id] = !openedNewsGroups[id];
   const opened = openedNewsGroups[id];
-
   target.classList.toggle("open", opened);
-
   const label = id === "domesticMore" ? "국내" : "해외";
   button.textContent = opened ? "접기" : `${label} 기사 더보기 ${target.children.length}개`;
 }
 
 function getInsightTags(item){
-  const text = `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""} ${item.insight || ""}`;
+  const text = `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""} ${item.insight || ""}`.toLowerCase();
   const tags = [];
-
-  config().tags.forEach(tag => {
-    if(text.toLowerCase().includes(tag.toLowerCase()) || text.includes(tag)) tags.push(tag);
-  });
-
-  config().keywords.forEach(k => {
-    if(text.includes(k) && !tags.includes(k)) tags.push(k);
-  });
-
+  config().tags.forEach(tag => { if(text.includes(tag.toLowerCase())) tags.push(tag); });
+  config().keywords.forEach(k => { if(text.includes(k.toLowerCase()) && !tags.includes(k)) tags.push(k); });
+  if(item.sourceType === "global" && !tags.includes("글로벌")) tags.push("글로벌");
   return tags.length ? tags.slice(0,4) : ["시장참고"];
 }
 
@@ -793,20 +701,17 @@ function renderKeywordBars(data){
   const keywords = config().keywords;
   const rows = keywords.map(keyword => {
     const count = data.filter(article => {
-      const text = `${article.title || ""} ${article.rawSummary || ""} ${article.summary || ""} ${article.insight || ""}`;
-      return text.includes(keyword);
+      const text = `${article.title || ""} ${article.rawSummary || ""} ${article.summary || ""}`.toLowerCase();
+      return text.includes(keyword.toLowerCase());
     }).length;
     return { keyword, count };
   });
 
-  const max = Math.max(...rows.map(r => r.count), 1);
-
+  const max = Math.max(...rows.map(r=>r.count),1);
   document.getElementById("keywordBars").innerHTML = rows.map(row => `
     <div class="keyword-row">
       <span>${escapeHtml(row.keyword)}</span>
-      <div class="keyword-track">
-        <div class="keyword-fill" style="width:${Math.round((row.count / max) * 100)}%"></div>
-      </div>
+      <div class="keyword-track"><div class="keyword-fill" style="width:${Math.round((row.count/max)*100)}%"></div></div>
       <span>${row.count}</span>
     </div>
   `).join("");
@@ -816,42 +721,31 @@ function renderFlowChart(data){
   const svg = document.getElementById("flowChart");
   const labels = document.getElementById("flowLabels");
   const summary = document.getElementById("flowSummary");
-
   const buckets = makeFlowBuckets(data);
-  const max = Math.max(...buckets.map(b => b.value), 1);
-  const width = 720;
-  const height = 170;
-  const padX = 24;
-  const padY = 22;
+  const max = Math.max(...buckets.map(b=>b.value),1);
+  const width=720,height=170,padX=24,padY=22;
 
-  const points = buckets.map((b, i) => {
-    const x = padX + (i * ((width - padX * 2) / Math.max(buckets.length - 1, 1)));
-    const y = height - padY - ((b.value / max) * (height - padY * 2));
-    return { x, y, ...b };
+  const points = buckets.map((b,i)=>{
+    const x = padX + (i*((width-padX*2)/Math.max(buckets.length-1,1)));
+    const y = height - padY - ((b.value/max)*(height-padY*2));
+    return {x,y,...b};
   });
 
-  const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-  const areaPath = `${path} L ${points[points.length - 1].x} ${height - padY} L ${points[0].x} ${height - padY} Z`;
+  const path = points.map((p,i)=>`${i===0?"M":"L"} ${p.x} ${p.y}`).join(" ");
+  const areaPath = `${path} L ${points[points.length-1].x} ${height-padY} L ${points[0].x} ${height-padY} Z`;
 
   svg.innerHTML = `
-    <defs>
-      <linearGradient id="flowFill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="rgba(217,255,95,.26)" />
-        <stop offset="100%" stop-color="rgba(217,255,95,0)" />
-      </linearGradient>
-    </defs>
-    <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="rgba(255,255,255,.12)" stroke-width="1" />
+    <defs><linearGradient id="flowFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(217,255,95,.26)" /><stop offset="100%" stop-color="rgba(217,255,95,0)" /></linearGradient></defs>
+    <line x1="${padX}" y1="${height-padY}" x2="${width-padX}" y2="${height-padY}" stroke="rgba(255,255,255,.12)" stroke-width="1" />
     <path d="${areaPath}" class="flow-area" fill="url(#flowFill)" />
     <path d="${path}" class="flow-line" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-    ${points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="6" class="flow-dot" />`).join("")}
+    ${points.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="6" class="flow-dot" />`).join("")}
   `;
 
-  labels.innerHTML = buckets.map(b => `<span>${b.label}</span>`).join("");
-
+  labels.innerHTML = buckets.map(b=>`<span>${b.label}</span>`).join("");
   const first = buckets[0]?.value || 0;
-  const last = buckets[buckets.length - 1]?.value || 0;
+  const last = buckets[buckets.length-1]?.value || 0;
   const direction = last > first ? "상승" : last < first ? "하락" : "유지";
-
   summary.innerHTML = `최근 3개월 ${config().tab} 뉴스 신호는 <strong>${direction}</strong> 흐름입니다. 최근 구간 ${last}건.`;
 }
 
@@ -859,28 +753,24 @@ function makeFlowBuckets(data){
   const periodValue = document.getElementById("periodFilter").value || "90";
   const bucketCount = 6;
   const now = new Date();
-
   let days = 90;
   if(periodValue === "30") days = 30;
   if(periodValue === "365") days = 365;
   if(periodValue === "all") days = 180;
 
   const bucketSize = Math.ceil(days / bucketCount);
-  const buckets = Array.from({length:bucketCount}, (_, i) => {
+  const buckets = Array.from({length:bucketCount},(_,i)=>{
     const start = new Date();
-    start.setDate(now.getDate() - days + (i * bucketSize));
+    start.setDate(now.getDate() - days + (i*bucketSize));
     const end = new Date();
-    end.setDate(now.getDate() - days + ((i + 1) * bucketSize));
-    return {
-      start,end,value:0,
-      label:days >= 365 ? `${start.getMonth()+1}월` : `${start.getMonth()+1}/${start.getDate()}`
-    };
+    end.setDate(now.getDate() - days + ((i+1)*bucketSize));
+    return {start,end,value:0,label:days>=365 ? `${start.getMonth()+1}월` : `${start.getMonth()+1}/${start.getDate()}`};
   });
 
-  data.forEach(item => {
+  data.forEach(item=>{
     const d = new Date(item.pubDate);
     if(isNaN(d.getTime())) return;
-    const target = buckets.find(b => d >= b.start && d < b.end);
+    const target = buckets.find(b=>d>=b.start && d<b.end);
     if(target) target.value += Math.max(1, Math.round(Number(item.score || 50) / 30));
   });
 
@@ -890,44 +780,30 @@ function makeFlowBuckets(data){
 function renderInterestChart(data){
   const chart = document.getElementById("interestChart");
   const list = document.getElementById("interestList");
-
   const categories = [
     { key:"정책", color:"#d9ff5f" },
     { key:"시장", color:"#8ecbff" },
     { key:"기술", color:"#73ff9c" },
     { key:"리스크", color:"#ff7b7b" }
   ];
-
-  const total = Math.max(data.length, 1);
-  const rows = categories.map(item => ({
-    ...item,
-    count:data.filter(article => article.category === item.key).length
-  }));
-
+  const total = Math.max(data.length,1);
+  const rows = categories.map(item=>({...item,count:data.filter(article=>article.category===item.key).length}));
   const top = [...rows].sort((a,b)=>b.count-a.count)[0] || rows[0];
-  const topPercent = Math.round((top.count / total) * 100);
-  const radius = 34;
-  const circumference = 2 * Math.PI * radius;
-  const dash = circumference * topPercent / 100;
+  const topPercent = Math.round((top.count/total)*100);
+  const radius=34,circumference=2*Math.PI*radius,dash=circumference*topPercent/100;
 
   chart.innerHTML = `
     <circle class="interest-bg" cx="50" cy="50" r="${radius}"></circle>
-    <circle cx="50" cy="50" r="${radius}" fill="none" stroke="${top.color}" stroke-width="10"
-      stroke-dasharray="${dash} ${circumference - dash}" stroke-linecap="round"
-      transform="rotate(-90 50 50)">
-    </circle>
+    <circle cx="50" cy="50" r="${radius}" fill="none" stroke="${top.color}" stroke-width="10" stroke-dasharray="${dash} ${circumference-dash}" stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
     <text x="50" y="47" class="interest-center">${topPercent}%</text>
     <text x="50" y="58" class="interest-sub">${escapeHtml(top.key)}</text>
   `;
 
-  const max = Math.max(...rows.map(r => r.count), 1);
-
-  list.innerHTML = rows.map(row => `
+  const max = Math.max(...rows.map(r=>r.count),1);
+  list.innerHTML = rows.map(row=>`
     <div class="interest-item">
       <span>${escapeHtml(row.key)}</span>
-      <div class="interest-track">
-        <div class="interest-fill" style="width:${Math.round((row.count / max) * 100)}%;background:${row.color};"></div>
-      </div>
+      <div class="interest-track"><div class="interest-fill" style="width:${Math.round((row.count/max)*100)}%;background:${row.color};"></div></div>
       <span>${row.count}</span>
     </div>
   `).join("");
@@ -942,84 +818,55 @@ function renderSolarBoard(){
     { name:"LA", region:"NA", offset:-8 }
   ];
 
-  const rows = cities.map(city => {
+  const rows = cities.map(city=>{
     const utc = new Date();
-    const hour = (utc.getUTCHours() + city.offset + 24) % 24;
-
-    let score = 0;
-    let label = "야간";
-
-    if(hour >= 5 && hour < 7){ score = 25; label = "일출 전후"; }
-    else if(hour >= 7 && hour < 11){ score = 65; label = "오전 발전 가능"; }
-    else if(hour >= 11 && hour <= 15){ score = 92; label = "발전 최적 시간대"; }
-    else if(hour > 15 && hour <= 18){ score = 55; label = "오후 발전 가능"; }
-    else if(hour > 18 && hour <= 20){ score = 20; label = "일몰 전후"; }
-
-    return { ...city, hour, score, label };
+    const hour = (utc.getUTCHours()+city.offset+24)%24;
+    let score=0,label="야간";
+    if(hour>=5&&hour<7){score=25;label="일출 전후";}
+    else if(hour>=7&&hour<11){score=65;label="오전 발전 가능";}
+    else if(hour>=11&&hour<=15){score=92;label="발전 최적 시간대";}
+    else if(hour>15&&hour<=18){score=55;label="오후 발전 가능";}
+    else if(hour>18&&hour<=20){score=20;label="일몰 전후";}
+    return {...city,hour,score,label};
   });
 
-  document.getElementById("solarBoard").innerHTML = rows.map(row => `
+  document.getElementById("solarBoard").innerHTML = rows.map(row=>`
     <div class="solar-city">
-      <div class="solar-city-top">
-        <strong>${escapeHtml(row.name)}</strong>
-        <em>${escapeHtml(row.region)}</em>
-      </div>
+      <div class="solar-city-top"><strong>${escapeHtml(row.name)}</strong><em>${escapeHtml(row.region)}</em></div>
       <div class="solar-time">${String(row.hour).padStart(2,"0")}:00</div>
       <div class="solar-status">${escapeHtml(row.label)}</div>
-      <div class="solar-bar">
-        <span style="width:${row.score}%"></span>
-      </div>
+      <div class="solar-bar"><span style="width:${row.score}%"></span></div>
     </div>
   `).join("");
 }
 
 function renderReports(data = getFilteredData()){
-  const checkList = document.getElementById("checkList");
-  const salesList = document.getElementById("salesList");
-
-  const topArticles = [...data].sort((a,b) => getMainNewsScore(b) - getMainNewsScore(a)).slice(0, 8);
-  const fullText = topArticles.map(item => `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""} ${item.insight || ""}`).join(" ");
-
-  const activeKeywords = config().keywords.filter(k => fullText.includes(k)).slice(0,3);
+  const topArticles = [...data].sort((a,b)=>getMainNewsScore(b)-getMainNewsScore(a)).slice(0,8);
+  const fullText = topArticles.map(item=>`${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""}`).join(" ").toLowerCase();
+  const activeKeywords = config().keywords.filter(k=>fullText.includes(k.toLowerCase())).slice(0,3);
 
   const report = activeKeywords.length
-    ? [`최근 핵심 신호는 ${activeKeywords.join(", ")} 중심으로 형성되고 있습니다.`]
-    : ["현재 상위 뉴스에서는 강한 단일 신호보다 관망 흐름이 우세합니다."];
+    ? `최근 핵심 신호는 ${activeKeywords.join(", ")} 중심으로 형성되고 있습니다.`
+    : "현재 상위 뉴스에서는 강한 단일 신호보다 관망 흐름이 우세합니다.";
 
   const sales = activeKeywords.length
-    ? [`실무적으로는 ${activeKeywords[0]} 관련 이슈를 우선 확인하고, 제안·투자·운영 판단 기준에 반영하는 것이 좋습니다.`]
-    : ["현재 뉴스 흐름은 직접 영업 제안보다 시장 모니터링 자료로 활용하는 것이 적절합니다."];
+    ? `실무적으로는 ${activeKeywords[0]} 관련 이슈를 우선 확인하고, 제안·투자·운영 판단 기준에 반영하는 것이 좋습니다.`
+    : "현재 뉴스 흐름은 직접 영업 제안보다 시장 모니터링 자료로 활용하는 것이 적절합니다.";
 
-  checkList.innerHTML = `<div class="report-text">${escapeHtml(report.join(" "))}</div>`;
-  salesList.innerHTML = `<div class="report-text">${escapeHtml(sales.join(" "))}</div>`;
+  document.getElementById("checkList").innerHTML = `<div class="report-text">${escapeHtml(report)}</div>`;
+  document.getElementById("salesList").innerHTML = `<div class="report-text">${escapeHtml(sales)}</div>`;
 }
 
 function stripHtml(str = ""){
   let value = String(str || "");
-  for(let i = 0; i < 3; i++){
-    value = value
-      .replace(/&nbsp;/g," ")
-      .replace(/&quot;/g,'"')
-      .replace(/&#39;/g,"'")
-      .replace(/&apos;/g,"'")
-      .replace(/&amp;/g,"&")
-      .replace(/&lt;/g,"<")
-      .replace(/&gt;/g,">");
+  for(let i=0;i<3;i++){
+    value = value.replace(/&nbsp;/g," ").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&apos;/g,"'").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">");
   }
-  return value.replace(/<a\b[^>]*>(.*?)<\/a>/gi,"$1")
-    .replace(/<font\b[^>]*>(.*?)<\/font>/gi," $1")
-    .replace(/<[^>]*>/g,"")
-    .replace(/\s+/g," ")
-    .trim();
+  return value.replace(/<a\b[^>]*>(.*?)<\/a>/gi,"$1").replace(/<font\b[^>]*>(.*?)<\/font>/gi," $1").replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim();
 }
 
 function escapeHtml(str){
-  return String(str || "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+  return String(str || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 }
 
 function formatDate(date){
@@ -1031,7 +878,8 @@ function formatDate(date){
 
 document.getElementById("categoryFilter").addEventListener("change", render);
 document.getElementById("sortFilter").addEventListener("change", render);
-document.getElementById("periodFilter").addEventListener("change", render);
+document.getElementById("periodFilter").addEventListener("change", loadNews);
+document.getElementById("quickSearch").addEventListener("change", loadNews);
 window.addEventListener("resize", render);
 
 initIndustryTabs();
