@@ -60,9 +60,7 @@ async function fetchNaverNews(query) {
   const NAVER_ID = process.env.NAVER_CLIENT_ID;
   const NAVER_SECRET = process.env.NAVER_CLIENT_SECRET;
 
-  if (!NAVER_ID || !NAVER_SECRET) {
-    return [];
-  }
+  if (!NAVER_ID || !NAVER_SECRET) return [];
 
   try {
     const url =
@@ -80,23 +78,21 @@ async function fetchNaverNews(query) {
       }
     });
 
-    if (!response.ok) {
-      return [];
-    }
+    if (!response.ok) return [];
 
     const data = await response.json();
 
     return (data.items || []).map(item => {
       const title = clean(item.title);
-      const originalSummary = clean(item.description);
-      const summary = makeReadableSummary(originalSummary, title, "Naver");
-      const text = `${title} ${originalSummary}`;
+      const rawSummary = clean(item.description);
+      const text = `${title} ${rawSummary}`;
 
       return {
         sourceType: "naver",
         source: "Naver",
         title,
-        summary,
+        rawSummary,
+        summary: makeReadableSummary(rawSummary, title, "Naver"),
         link: item.originallink || item.link,
         pubDate: item.pubDate,
         category: detectCategory(text),
@@ -126,10 +122,7 @@ async function fetchGoogleNews(query, period) {
       });
 
     const response = await fetch(url);
-
-    if (!response.ok) {
-      return [];
-    }
+    if (!response.ok) return [];
 
     const xml = await response.text();
     const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
@@ -139,17 +132,17 @@ async function fetchGoogleNews(query, period) {
 
       const title = clean(getTag(item, "title"));
       const source = clean(getTag(item, "source")) || "Google News";
-      const rawDescription = getTag(item, "description");
-      const summary = makeReadableSummary(rawDescription, title, source);
+      const rawSummary = clean(getTag(item, "description"));
       const link = clean(getTag(item, "link"));
       const pubDate = clean(getTag(item, "pubDate"));
-      const text = `${title} ${rawDescription}`;
+      const text = `${title} ${rawSummary}`;
 
       return {
         sourceType: "google",
         source,
         title,
-        summary,
+        rawSummary,
+        summary: makeReadableSummary(rawSummary, title, source),
         link,
         pubDate,
         category: detectCategory(text),
@@ -179,10 +172,7 @@ async function fetchGlobalSolarNews(period) {
       });
 
     const response = await fetch(url);
-
-    if (!response.ok) {
-      return [];
-    }
+    if (!response.ok) return [];
 
     const xml = await response.text();
     const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
@@ -192,17 +182,17 @@ async function fetchGlobalSolarNews(period) {
 
       const title = clean(getTag(item, "title"));
       const source = clean(getTag(item, "source")) || "Global News";
-      const rawDescription = getTag(item, "description");
-      const summary = makeReadableSummary(rawDescription, title, source);
+      const rawSummary = clean(getTag(item, "description"));
       const link = clean(getTag(item, "link"));
       const pubDate = clean(getTag(item, "pubDate"));
-      const text = `${title} ${rawDescription}`;
+      const text = `${title} ${rawSummary}`;
 
       return {
         sourceType: "global",
         source,
         title,
-        summary,
+        rawSummary,
+        summary: makeReadableSummary(rawSummary, title, source),
         link,
         pubDate,
         category: detectCategory(text),
@@ -244,45 +234,49 @@ function clean(text = "") {
 }
 
 function makeReadableSummary(description = "", title = "", source = "") {
-  const text = `${title} ${description} ${source}`.toLowerCase();
+  let text = clean(description || "");
 
-  if (/정책|산업부|보조금|지원사업|ira|policy|subsidy|tax credit/.test(text)) {
-    return "정책·지원사업 변화 흐름이 함께 언급되고 있습니다.";
+  if (!text || text.length < 20) {
+    text = clean(title || "");
   }
 
-  if (/rec|smp|전력시장|가격|수익|market|price|investment|finance/.test(text)) {
-    return "REC/SMP 수익성과 시장 흐름 관련 관심이 확대되고 있습니다.";
+  text = text
+    .replace(title, "")
+    .replace(source, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!text || text.length < 12) {
+    text = clean(title || "");
   }
 
-  if (/ess|배터리|저장|battery|storage|inverter|module/.test(text)) {
-    return "ESS·저장장치 및 전력 안정화 흐름이 언급되고 있습니다.";
+  if (text.length > 240) {
+    text = text.slice(0, 240) + "...";
   }
 
-  if (/계통|접속|지연|송전|grid|curtailment|delay/.test(text)) {
-    return "계통·접속 지연 및 송전 리스크 이슈가 포함되어 있습니다.";
+  const lower = `${title} ${description}`.toLowerCase();
+
+  if (/rec|smp|전력시장|가격|수익/.test(lower)) {
+    return `${text} REC/SMP 흐름과 발전사업 수익성 변화 가능성을 함께 확인할 필요가 있습니다.`;
   }
 
-  if (/화재|고장|안전|risk|fire|safety|maintenance/.test(text)) {
-    return "안전·유지보수 및 운영 리스크 관련 흐름이 감지됩니다.";
+  if (/계통|접속|지연|송전|grid|curtailment|delay/.test(lower)) {
+    return `${text} 계통·송전 인프라 이슈가 사업 일정에 영향을 줄 가능성이 있습니다.`;
   }
 
-  if (/중국|china|공급망|폴리실리콘|longi|trina|jinko/.test(text)) {
-    return "중국 공급망 및 글로벌 원자재 흐름이 함께 언급되고 있습니다.";
+  if (/ess|배터리|저장|battery|storage/.test(lower)) {
+    return `${text} ESS 및 전력 안정화 시장 흐름도 함께 주목할 필요가 있습니다.`;
   }
 
-  if (/투자|금리|finance|investment|fund|capital/.test(text)) {
-    return "시장 투자심리 및 사업성 관련 흐름이 반영되고 있습니다.";
+  if (/정책|산업부|보조금|지원사업|policy|subsidy|ira/.test(lower)) {
+    return `${text} 정책 변화 여부가 시장 투자 흐름에 영향을 줄 가능성이 있습니다.`;
   }
 
-  if (/유럽|europe|독일|germany|france/.test(text)) {
-    return "유럽 재생에너지 및 전력시장 흐름이 함께 반영되고 있습니다.";
+  if (/중국|china|공급망|폴리실리콘|longi|trina|jinko/.test(lower)) {
+    return `${text} 중국 공급망 및 글로벌 원자재 흐름 변화 가능성도 함께 확인할 필요가 있습니다.`;
   }
 
-  if (/미국|usa|us|ira|tax credit/.test(text)) {
-    return "미국 IRA 및 태양광 투자 정책 흐름이 언급되고 있습니다.";
-  }
-
-  return "태양광 산업 흐름 참고용 주요 기사입니다.";
+  return text || "태양광 산업 흐름 참고용 기사입니다.";
 }
 
 function detectCategory(text = "") {
