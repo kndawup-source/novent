@@ -4,10 +4,12 @@ export default async function handler(req, res) {
     const period = req.query.period || "90";
     const debug = req.query.debug === "1";
 
+    const normalizedQuery = normalizeQuery(query);
+
     const [naverNews, googleNews, globalNews] = await Promise.all([
-      fetchNaverNews(query),
-      fetchGoogleNews(query, period),
-      fetchGlobalSolarNews(period)
+      fetchNaverNews(normalizedQuery),
+      fetchGoogleNews(normalizedQuery, period),
+      fetchGlobalNews(normalizedQuery, period)
     ]);
 
     const articles = removeDuplicates([
@@ -15,34 +17,48 @@ export default async function handler(req, res) {
       ...googleNews,
       ...globalNews
     ])
-      .sort((a, b) => (new Date(b.pubDate).getTime() || 0) - (new Date(a.pubDate).getTime() || 0))
+      .sort((a, b) => {
+        const da = new Date(a.pubDate).getTime() || 0;
+        const db = new Date(b.pubDate).getTime() || 0;
+        return db - da;
+      })
       .slice(0, 100);
 
     const avgScore = articles.length
-      ? Math.round(articles.reduce((sum, item) => sum + Number(item.score || 0), 0) / articles.length)
+      ? Math.round(
+          articles.reduce((sum, item) => sum + Number(item.score || 0), 0) /
+            articles.length
+        )
       : 0;
 
     return res.status(200).json({
       ok: true,
-      query,
+      query: normalizedQuery,
       period,
       count: articles.length,
-      ...(debug ? {
-        debug: {
-          naverCount: naverNews.length,
-          googleCount: googleNews.length,
-          globalCount: globalNews.length,
-          hasNaverId: Boolean(process.env.NAVER_CLIENT_ID),
-          hasNaverSecret: Boolean(process.env.NAVER_CLIENT_SECRET)
-        }
-      } : {}),
+      ...(debug
+        ? {
+            debug: {
+              naverCount: naverNews.length,
+              googleCount: googleNews.length,
+              globalCount: globalNews.length,
+              hasNaverId: Boolean(process.env.NAVER_CLIENT_ID),
+              hasNaverSecret: Boolean(process.env.NAVER_CLIENT_SECRET)
+            }
+          }
+        : {}),
       articles,
       signal: {
-        mood: avgScore >= 75 ? "시장 관심 확대" : avgScore >= 60 ? "관심 증가" : "관망",
+        mood:
+          avgScore >= 75
+            ? "시장 관심 확대"
+            : avgScore >= 60
+            ? "관심 증가"
+            : "관망",
         avgScore,
         summary: articles.length
           ? "뉴스 데이터를 기반으로 산업 흐름을 분석했습니다."
-          : "수집된 뉴스가 없습니다. API 키 또는 외부 뉴스 호출 상태를 확인해주세요."
+          : "수집된 뉴스가 없습니다. 검색어 또는 외부 뉴스 호출 상태를 확인해주세요."
       }
     });
   } catch (error) {
@@ -53,6 +69,46 @@ export default async function handler(req, res) {
   }
 }
 
+function normalizeQuery(query = "") {
+  return String(query || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function toSpaceQuery(query = "") {
+  return String(query || "")
+    .replace(/\bOR\b/gi, " ")
+    .replace(/[()"]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function toGlobalQuery(query = "") {
+  const raw = String(query || "").toLowerCase();
+
+  if (/엔터|kpop|케이팝|하이브|음원|콘서트|팬덤|sm|yg|jyp/.test(raw)) {
+    return "K-pop OR entertainment industry OR music streaming OR concert tour OR fandom OR HYBE OR SM Entertainment OR JYP Entertainment";
+  }
+
+  if (/반도체|hbm|ai칩|파운드리|메모리|삼성전자|하이닉스/.test(raw)) {
+    return "semiconductor OR HBM OR AI chip OR foundry OR memory chip OR NVIDIA OR TSMC OR Samsung Electronics";
+  }
+
+  if (/ai|인공지능|llm|생성형|openai|anthropic|gpu/.test(raw)) {
+    return "artificial intelligence OR generative AI OR LLM OR OpenAI OR Anthropic OR GPU OR AI agents";
+  }
+
+  if (/전기차|배터리|자율주행|로보택시|테슬라|현대차|mobility/.test(raw)) {
+    return "electric vehicle OR EV battery OR autonomous driving OR robotaxi OR Tesla OR mobility industry";
+  }
+
+  if (/태양광|재생에너지|rec|smp|ess|solar/.test(raw)) {
+    return "solar industry OR photovoltaic OR renewable energy OR energy storage OR solar supply chain";
+  }
+
+  return query;
+}
+
 async function fetchNaverNews(query) {
   const NAVER_ID = process.env.NAVER_CLIENT_ID;
   const NAVER_SECRET = process.env.NAVER_CLIENT_SECRET;
@@ -60,15 +116,12 @@ async function fetchNaverNews(query) {
   if (!NAVER_ID || !NAVER_SECRET) return [];
 
   try {
-    const naverQuery = String(query)
-      .replace(/\bOR\b/gi, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+    const naverQuery = toSpaceQuery(query);
 
     const url =
       "https://openapi.naver.com/v1/search/news.json?" +
       new URLSearchParams({
-        query: naverQuery || "태양광 재생에너지",
+        query: naverQuery || "산업 뉴스",
         display: "50",
         sort: "date"
       });
@@ -109,15 +162,12 @@ async function fetchNaverNews(query) {
 
 async function fetchGoogleNews(query, period) {
   try {
-    const cleanQuery = String(query)
-      .replace(/\bOR\b/gi, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+    const cleanQuery = toSpaceQuery(query);
 
     const periodQuery =
       period && period !== "all"
-        ? `${cleanQuery || "태양광 재생에너지 REC SMP ESS"} when:${period}d`
-        : cleanQuery || "태양광 재생에너지 REC SMP ESS";
+        ? `${cleanQuery || "산업 뉴스"} when:${period}d`
+        : cleanQuery || "산업 뉴스";
 
     const url =
       "https://news.google.com/rss/search?" +
@@ -141,6 +191,7 @@ async function fetchGoogleNews(query, period) {
 
     return items.slice(0, 50).map(match => {
       const item = match[1];
+
       const title = clean(getTag(item, "title"));
       const source = clean(getTag(item, "source")) || "Google News";
       const rawSummary = clean(getTag(item, "description"));
@@ -166,17 +217,19 @@ async function fetchGoogleNews(query, period) {
   }
 }
 
-async function fetchGlobalSolarNews(period) {
+async function fetchGlobalNews(query, period) {
   try {
-    const query =
+    const globalQuery = toGlobalQuery(query);
+
+    const periodQuery =
       period && period !== "all"
-        ? `solar photovoltaic energy storage solar industry when:${period}d`
-        : "solar photovoltaic energy storage solar industry";
+        ? `${globalQuery} when:${period}d`
+        : globalQuery;
 
     const url =
       "https://news.google.com/rss/search?" +
       new URLSearchParams({
-        q: query,
+        q: periodQuery,
         hl: "en-US",
         gl: "US",
         ceid: "US:en"
@@ -193,8 +246,9 @@ async function fetchGlobalSolarNews(period) {
     const xml = await response.text();
     const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
 
-    return items.slice(0, 30).map(match => {
+    return items.slice(0, 40).map(match => {
       const item = match[1];
+
       const title = clean(getTag(item, "title"));
       const source = clean(getTag(item, "source")) || "Global News";
       const rawSummary = clean(getTag(item, "description"));
@@ -273,8 +327,8 @@ function makeReadableSummary(description = "", title = "", source = "") {
     summary = text;
   }
 
-  if (summary.length > 180) {
-    summary = summary.slice(0, 180) + "...";
+  if (summary.length > 220) {
+    summary = summary.slice(0, 220) + "...";
   }
 
   return summary || "기사 내용을 확인해 산업 흐름을 참고하세요.";
@@ -283,10 +337,21 @@ function makeReadableSummary(description = "", title = "", source = "") {
 function detectCategory(text = "") {
   const value = String(text).toLowerCase();
 
-  if (/정책|산업부|보조금|지원사업|rps|규제|고시|정부|policy|subsidy|ira|tax credit/.test(value)) return "정책";
-  if (/rec|smp|전력시장|가격|수익|전력거래|market|price|investment|finance/.test(value)) return "시장";
-  if (/ess|배터리|인버터|모듈|효율|저장|battery|storage|module|inverter|technology/.test(value)) return "기술";
-  if (/계통|지연|화재|고장|민원|리스크|안전|grid|delay|fire|risk|safety|curtailment/.test(value)) return "리스크";
+  if (/정책|정부|규제|법안|산업부|보조금|지원사업|rps|고시|policy|subsidy|regulation|tax credit|ira/.test(value)) {
+    return "정책";
+  }
+
+  if (/시장|가격|수익|매출|실적|투자|주가|전력시장|rec|smp|market|price|revenue|earnings|investment|finance|stock/.test(value)) {
+    return "시장";
+  }
+
+  if (/기술|ai|hbm|gpu|반도체|배터리|ess|인버터|모듈|플랫폼|streaming|technology|battery|storage|module|inverter|chip|model/.test(value)) {
+    return "기술";
+  }
+
+  if (/리스크|논란|소송|규제|계약|화재|고장|안전|공급망|수출규제|risk|lawsuit|controversy|safety|delay|fire|supply chain|export control/.test(value)) {
+    return "리스크";
+  }
 
   return "일반";
 }
@@ -295,11 +360,12 @@ function makeScore(text = "") {
   const value = String(text).toLowerCase();
   let score = 45;
 
-  if (/태양광|solar|photovoltaic|pv/.test(value)) score += 8;
-  if (/정책|산업부|보조금|policy|subsidy|ira/.test(value)) score += 12;
-  if (/rec|smp|수익|전력시장|market|price/.test(value)) score += 12;
-  if (/ess|배터리|저장|battery|storage/.test(value)) score += 10;
-  if (/계통|리스크|화재|grid|risk|curtailment/.test(value)) score += 12;
+  if (/태양광|solar|photovoltaic|pv|엔터|kpop|케이팝|반도체|ai|전기차|배터리/.test(value)) score += 8;
+  if (/정책|정부|보조금|규제|policy|subsidy|regulation|ira/.test(value)) score += 10;
+  if (/시장|가격|수익|실적|투자|market|price|earnings|investment/.test(value)) score += 10;
+  if (/기술|hbm|gpu|ess|ai|배터리|technology|chip|storage|model/.test(value)) score += 10;
+  if (/리스크|소송|논란|계약|공급망|risk|lawsuit|controversy|supply chain/.test(value)) score += 12;
+  if (/글로벌|미국|중국|일본|유럽|global|china|us|europe|japan/.test(value)) score += 6;
 
   return Math.min(score, 98);
 }
@@ -307,11 +373,21 @@ function makeScore(text = "") {
 function makeInsight(text = "") {
   const value = String(text).toLowerCase();
 
-  if (/계통|접속|지연|grid|curtailment/.test(value)) return "계통 접속 가능성과 사업 일정 리스크를 함께 점검해야 합니다.";
-  if (/rec|smp|가격|수익|market|price/.test(value)) return "수익성 변동 가능성이 있어 REC/SMP 흐름과 계약 조건 확인이 필요합니다.";
-  if (/ess|배터리|저장|battery|storage/.test(value)) return "ESS 연계 사업 또는 전력 안정화 제안 포인트로 활용할 수 있습니다.";
-  if (/정책|산업부|보조금|policy|subsidy|ira/.test(value)) return "정책 변화가 수주, 투자, 제안서 방향에 영향을 줄 수 있습니다.";
-  if (/화재|고장|안전|risk|fire|safety/.test(value)) return "안전관리, 유지보수, 사후관리 체계 점검이 필요합니다.";
+  if (/리스크|소송|논란|계약|risk|lawsuit|controversy/.test(value)) {
+    return "리스크 이슈가 감지됩니다. 관련 기업, 일정, 계약 조건을 함께 확인해야 합니다.";
+  }
+
+  if (/정책|정부|보조금|규제|policy|subsidy|regulation/.test(value)) {
+    return "정책 변화가 시장 방향과 사업 판단에 영향을 줄 수 있습니다.";
+  }
+
+  if (/시장|가격|수익|실적|투자|market|price|earnings|investment/.test(value)) {
+    return "시장성과 수익성 변화 가능성이 있어 관련 지표를 함께 확인할 필요가 있습니다.";
+  }
+
+  if (/기술|hbm|gpu|ess|ai|배터리|technology|chip|storage|model/.test(value)) {
+    return "기술 변화가 경쟁 구도와 투자 포인트에 영향을 줄 수 있습니다.";
+  }
 
   return "시장 흐름 참고용 기사입니다. 관련 키워드의 반복 여부를 확인하세요.";
 }
