@@ -1,23 +1,27 @@
 export default async function handler(req, res) {
   try {
-    const query = req.query.q || "태양광 재생에너지 REC SMP ESS";
+    const industry = normalizeIndustry(req.query.industry);
+    const topic = String(req.query.topic || industry || "solar").trim();
     const period = req.query.period || "90";
     const debug = req.query.debug === "1";
 
-    const normalizedQuery = normalizeQuery(query);
+    const profile = getNewsProfile(industry, topic);
 
     const [naverNews, googleNews, globalNews] = await Promise.all([
-      fetchNaverNews(normalizedQuery),
-      fetchGoogleNews(normalizedQuery, period),
-      fetchGlobalNews(normalizedQuery)
+      fetchNaverNews(profile),
+      fetchGoogleKoreaNews(profile, period),
+      fetchGlobalNews(profile)
     ]);
 
+    const domesticNews = removeDuplicates([...naverNews, ...googleNews]);
+    const globalClean = removeDuplicates(globalNews);
+
     const articles = removeDuplicates([
-      ...naverNews,
-      ...googleNews,
-      ...globalNews
+      ...domesticNews,
+      ...globalClean
     ])
       .filter(item => item.title && item.link)
+      .filter(item => isRelevantToIndustry(item, profile))
       .sort((a, b) => {
         const da = new Date(a.pubDate).getTime() || 0;
         const db = new Date(b.pubDate).getTime() || 0;
@@ -26,45 +30,38 @@ export default async function handler(req, res) {
       .slice(0, 120);
 
     const avgScore = articles.length
-      ? Math.round(
-          articles.reduce((sum, item) => sum + Number(item.score || 0), 0) /
-            articles.length
-        )
+      ? Math.round(articles.reduce((sum, item) => sum + Number(item.score || 0), 0) / articles.length)
       : 0;
 
     return res.status(200).json({
       ok: true,
-      query: normalizedQuery,
+      industry,
+      topic,
       period,
       count: articles.length,
-
-      ...(debug
-        ? {
-            debug: {
-              naverCount: naverNews.length,
-              googleCount: googleNews.length,
-              globalCount: globalNews.length,
-              hasNaverId: Boolean(process.env.NAVER_CLIENT_ID),
-              hasNaverSecret: Boolean(process.env.NAVER_CLIENT_SECRET)
-            }
-          }
-        : {}),
-
+      ...(debug ? {
+        debug: {
+          industry,
+          topic,
+          domesticCount: domesticNews.length,
+          naverCount: naverNews.length,
+          googleCount: googleNews.length,
+          globalCount: globalClean.length,
+          finalCount: articles.length,
+          naverQueries: profile.naverQueries,
+          googleQueries: profile.googleQueries,
+          globalQueries: profile.globalQueries,
+          hasNaverId: Boolean(process.env.NAVER_CLIENT_ID),
+          hasNaverSecret: Boolean(process.env.NAVER_CLIENT_SECRET)
+        }
+      } : {}),
       articles,
-
       signal: {
-        mood:
-          avgScore >= 78
-            ? "시장 관심 확대"
-            : avgScore >= 62
-            ? "관심 증가"
-            : "관망",
-
+        mood: avgScore >= 78 ? "시장 관심 확대" : avgScore >= 62 ? "관심 증가" : "관망",
         avgScore,
-
         summary: articles.length
-          ? "실시간 뉴스 데이터를 기반으로 산업 흐름을 분석했습니다."
-          : "수집된 뉴스가 없습니다. 검색어 또는 외부 뉴스 상태를 확인해주세요."
+          ? `${profile.label} 뉴스 데이터를 기반으로 산업 흐름을 분석했습니다.`
+          : `${profile.label} 관련 수집 뉴스가 없습니다. 검색어 또는 외부 뉴스 상태를 확인해주세요.`
       }
     });
   } catch (error) {
@@ -75,14 +72,248 @@ export default async function handler(req, res) {
   }
 }
 
-/* ------------------------------------------------ */
-/* normalize */
-/* ------------------------------------------------ */
+function normalizeIndustry(value = "") {
+  const key = String(value || "").toLowerCase().trim();
+  if (["solar", "entertainment", "semiconductor", "ai", "mobility"].includes(key)) return key;
+  return "solar";
+}
 
-function normalizeQuery(query = "") {
-  return String(query || "")
-    .replace(/\s+/g, " ")
-    .trim();
+function getNewsProfile(industry, topic = "") {
+  const profiles = {
+    solar: {
+      label: "태양광",
+      include: ["태양광", "재생에너지", "신재생", "REC", "SMP", "ESS", "전력시장", "계통", "solar", "photovoltaic", "renewable energy", "energy storage"],
+      exclude: [],
+      topicMap: {
+        solar: ["태양광", "재생에너지", "REC", "SMP", "ESS"],
+        solar_policy: ["태양광 정책", "재생에너지 정책", "산업부 태양광", "신재생 보조금"],
+        solar_market: ["REC", "SMP", "전력시장", "태양광 수익"],
+        solar_tech: ["ESS", "태양광 인버터", "태양광 모듈", "전력저장"],
+        solar_risk: ["계통 접속", "태양광 화재", "태양광 민원", "접속지연"]
+      },
+      global: ["solar industry", "photovoltaic", "renewable energy", "energy storage", "solar supply chain"]
+    },
+    entertainment: {
+      label: "엔터",
+      include: ["엔터", "엔터테인먼트", "케이팝", "K팝", "K-POP", "KPOP", "하이브", "에스엠", "SM", "JYP", "YG", "콘서트", "월드투어", "음원", "팬덤", "아이돌", "HYBE", "K-pop", "BTS", "Blackpink", "music streaming", "concert tour"],
+      exclude: ["스포츠", "정치"],
+      topicMap: {
+        entertainment: ["하이브", "SM엔터테인먼트", "JYP엔터", "YG엔터테인먼트", "케이팝", "K팝", "엔터테인먼트", "콘서트", "음원", "팬덤"],
+        entertainment_tour: ["컴백", "콘서트", "월드투어", "팬미팅", "K팝 투어"],
+        entertainment_music: ["음원", "빌보드", "멜론", "스포티파이", "유튜브 뮤직"],
+        entertainment_fandom: ["팬덤", "위버스", "버블", "틱톡", "굿즈"],
+        entertainment_risk: ["엔터 리스크", "전속계약", "소송", "논란", "아티스트 리스크"]
+      },
+      global: ["K-pop", "HYBE", "BTS", "Blackpink", "SM Entertainment", "JYP Entertainment", "YG Entertainment", "Korean music industry"]
+    },
+    semiconductor: {
+      label: "반도체",
+      include: ["반도체", "HBM", "AI칩", "GPU", "메모리", "파운드리", "삼성전자", "SK하이닉스", "TSMC", "엔비디아", "semiconductor", "NVIDIA", "chip", "foundry", "memory"],
+      exclude: [],
+      topicMap: {
+        semiconductor: ["반도체", "HBM", "AI 반도체", "삼성전자 반도체", "SK하이닉스", "파운드리"],
+        semiconductor_hbm: ["HBM", "AI 반도체", "엔비디아", "GPU", "고대역폭메모리"],
+        semiconductor_memory: ["D램", "낸드", "메모리 반도체", "SK하이닉스", "삼성전자 메모리"],
+        semiconductor_foundry: ["파운드리", "TSMC", "삼성 파운드리", "반도체 위탁생산"],
+        semiconductor_risk: ["반도체 수출규제", "공급망", "미국 중국 반도체", "반도체 장비"]
+      },
+      global: ["semiconductor", "HBM", "AI chip", "NVIDIA", "TSMC", "Samsung Electronics", "SK Hynix", "memory chip"]
+    },
+    ai: {
+      label: "AI",
+      include: ["AI", "인공지능", "생성형 AI", "LLM", "OpenAI", "Anthropic", "GPU", "에이전트", "데이터센터", "artificial intelligence", "generative AI", "AI agents"],
+      exclude: [],
+      topicMap: {
+        ai: ["생성형 AI", "인공지능", "LLM", "OpenAI", "GPU"],
+        ai_model: ["LLM", "OpenAI", "Anthropic", "Gemini", "Claude"],
+        ai_gpu: ["GPU", "엔비디아", "AI 데이터센터", "클라우드"],
+        ai_agent: ["AI 에이전트", "업무 AI", "자동화"],
+        ai_risk: ["AI 규제", "AI 저작권", "AI 개인정보", "AI 안전"]
+      },
+      global: ["artificial intelligence", "generative AI", "OpenAI", "Anthropic", "AI agents", "GPU", "data center"]
+    },
+    mobility: {
+      label: "모빌리티",
+      include: ["전기차", "EV", "배터리", "자율주행", "로보택시", "테슬라", "현대차", "충전", "electric vehicle", "Tesla", "EV battery", "autonomous driving", "robotaxi"],
+      exclude: [],
+      topicMap: {
+        mobility: ["전기차", "테슬라", "현대차", "배터리", "자율주행"],
+        mobility_ev: ["전기차", "EV", "현대차", "테슬라"],
+        mobility_battery: ["배터리", "리튬", "LFP", "전고체"],
+        mobility_auto: ["자율주행", "로보택시", "ADAS"],
+        mobility_charge: ["충전소", "충전 인프라", "전기차 보조금"]
+      },
+      global: ["electric vehicle", "Tesla", "EV battery", "autonomous driving", "robotaxi", "mobility industry"]
+    }
+  };
+
+  const profile = profiles[industry] || profiles.solar;
+  const selected = profile.topicMap[topic] || profile.topicMap[industry] || Object.values(profile.topicMap)[0];
+
+  return {
+    ...profile,
+    industry,
+    topic,
+    naverQueries: selected.slice(0, 12),
+    googleQueries: selected.slice(0, 10),
+    globalQueries: profile.global.slice(0, 10)
+  };
+}
+
+async function fetchNaverNews(profile) {
+  const NAVER_ID = process.env.NAVER_CLIENT_ID;
+  const NAVER_SECRET = process.env.NAVER_CLIENT_SECRET;
+  if (!NAVER_ID || !NAVER_SECRET) return [];
+
+  const results = await Promise.all(
+    profile.naverQueries.map(async q => {
+      try {
+        const url =
+          "https://openapi.naver.com/v1/search/news.json?" +
+          new URLSearchParams({ query: q, display: "20", sort: "date" });
+
+        const response = await fetch(url, {
+          headers: {
+            "X-Naver-Client-Id": NAVER_ID,
+            "X-Naver-Client-Secret": NAVER_SECRET
+          }
+        });
+
+        if (!response.ok) return [];
+        const data = await response.json();
+
+        return (data.items || []).map(item =>
+          normalizeArticle({
+            industry: profile.industry,
+            sourceType: "naver",
+            source: "Naver",
+            title: item.title,
+            rawSummary: item.description,
+            link: item.originallink || item.link,
+            pubDate: item.pubDate,
+            profile
+          })
+        );
+      } catch {
+        return [];
+      }
+    })
+  );
+
+  return results.flat();
+}
+
+async function fetchGoogleKoreaNews(profile, period) {
+  const results = await Promise.all(
+    profile.googleQueries.map(q =>
+      fetchGoogleRss({
+        q: period && period !== "all" ? `${q} when:${period}d` : q,
+        hl: "ko",
+        gl: "KR",
+        ceid: "KR:ko",
+        sourceType: "google",
+        fallbackSource: "Google News",
+        industry: profile.industry,
+        profile,
+        limit: 12
+      })
+    )
+  );
+
+  return results.flat();
+}
+
+async function fetchGlobalNews(profile) {
+  const results = await Promise.all(
+    profile.globalQueries.map(q =>
+      fetchGoogleRss({
+        q,
+        hl: "en-US",
+        gl: "US",
+        ceid: "US:en",
+        sourceType: "global",
+        fallbackSource: "Global News",
+        industry: profile.industry,
+        profile,
+        limit: 12
+      })
+    )
+  );
+
+  return results.flat();
+}
+
+async function fetchGoogleRss({ q, hl, gl, ceid, sourceType, fallbackSource, industry, profile, limit }) {
+  try {
+    const url =
+      "https://news.google.com/rss/search?" +
+      new URLSearchParams({ q, hl, gl, ceid });
+
+    const response = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" }
+    });
+
+    if (!response.ok) return [];
+
+    const xml = await response.text();
+    if (!xml || !xml.includes("<item>")) return [];
+
+    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
+
+    return items.slice(0, limit).map(match => {
+      const item = match[1];
+      return normalizeArticle({
+        industry,
+        sourceType,
+        source: clean(getTag(item, "source")) || fallbackSource,
+        title: getTag(item, "title"),
+        rawSummary: getTag(item, "description"),
+        link: getTag(item, "link"),
+        pubDate: getTag(item, "pubDate"),
+        profile
+      });
+    });
+  } catch {
+    return [];
+  }
+}
+
+function normalizeArticle({ industry, sourceType, source, title, rawSummary, link, pubDate, profile }) {
+  const cleanTitle = clean(title);
+  const cleanSource = clean(source);
+  const cleanSummary = clean(rawSummary);
+  const text = `${cleanTitle} ${cleanSummary}`;
+
+  return {
+    industry,
+    sourceType,
+    source: cleanSource,
+    title: cleanTitle,
+    rawSummary: cleanSummary,
+    summary: makeReadableSummary(cleanSummary, cleanTitle, cleanSource),
+    link: clean(link),
+    pubDate: clean(pubDate),
+    category: detectCategory(text),
+    score: makeScore(text, profile),
+    insight: makeInsight(text)
+  };
+}
+
+function isRelevantToIndustry(item, profile) {
+  const text = `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""}`.toLowerCase();
+
+  const includeHit = profile.include.some(word => text.includes(String(word).toLowerCase()));
+  const excludeHit = profile.exclude.some(word => text.includes(String(word).toLowerCase()));
+
+  if (excludeHit) return false;
+
+  if (item.sourceType === "global") return includeHit;
+  return includeHit || item.sourceType === "naver";
+}
+
+function getTag(xml, tag) {
+  const match = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
+  return match ? match[1].trim() : "";
 }
 
 function clean(text = "") {
@@ -108,370 +339,7 @@ function clean(text = "") {
     .trim();
 }
 
-function getTag(xml, tag) {
-  const match = xml.match(
-    new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`)
-  );
-
-  return match ? match[1].trim() : "";
-}
-
-/* ------------------------------------------------ */
-/* query */
-/* ------------------------------------------------ */
-
-function expandQueries(query = "") {
-  const raw = String(query || "").toLowerCase();
-
-  if (/엔터|kpop|케이팝|하이브|jyp|yg|sm/.test(raw)) {
-    return [
-      "하이브",
-      "SM엔터테인먼트",
-      "JYP엔터",
-      "YG엔터테인먼트",
-      "K팝",
-      "케이팝",
-      "아이돌",
-      "월드투어",
-      "음원",
-      "팬덤"
-    ];
-  }
-
-  if (/반도체|hbm|파운드리|ai칩|삼성전자|하이닉스/.test(raw)) {
-    return [
-      "HBM",
-      "AI 반도체",
-      "삼성전자 반도체",
-      "SK하이닉스",
-      "파운드리",
-      "엔비디아",
-      "TSMC",
-      "메모리 반도체"
-    ];
-  }
-
-  if (/ai|인공지능|llm|openai|gpu/.test(raw)) {
-    return [
-      "생성형 AI",
-      "LLM",
-      "OpenAI",
-      "Anthropic",
-      "GPU",
-      "AI 데이터센터",
-      "인공지능"
-    ];
-  }
-
-  if (/전기차|배터리|테슬라|자율주행/.test(raw)) {
-    return [
-      "전기차",
-      "EV",
-      "테슬라",
-      "배터리",
-      "자율주행",
-      "로보택시",
-      "현대차"
-    ];
-  }
-
-  if (/태양광|재생에너지|solar|ess|smp|rec/.test(raw)) {
-    return [
-      "태양광",
-      "재생에너지",
-      "ESS",
-      "REC",
-      "SMP",
-      "태양광 정책",
-      "전력시장"
-    ];
-  }
-
-  return [query];
-}
-
-function expandGlobalQueries(query = "") {
-  const raw = String(query || "").toLowerCase();
-
-  if (/엔터|kpop|케이팝|하이브|jyp|yg|sm/.test(raw)) {
-    return [
-      "K-pop",
-      "HYBE",
-      "BTS",
-      "Blackpink",
-      "SM Entertainment",
-      "JYP Entertainment",
-      "YG Entertainment",
-      "Korean music industry"
-    ];
-  }
-
-  if (/반도체|hbm|파운드리|ai칩|삼성전자|하이닉스/.test(raw)) {
-    return [
-      "semiconductor",
-      "HBM",
-      "AI chip",
-      "NVIDIA",
-      "TSMC",
-      "Samsung Electronics",
-      "SK Hynix"
-    ];
-  }
-
-  if (/ai|인공지능|llm|openai|gpu/.test(raw)) {
-    return [
-      "artificial intelligence",
-      "generative AI",
-      "OpenAI",
-      "Anthropic",
-      "GPU",
-      "AI agents"
-    ];
-  }
-
-  if (/전기차|배터리|테슬라|자율주행/.test(raw)) {
-    return [
-      "electric vehicle",
-      "Tesla",
-      "EV battery",
-      "autonomous driving",
-      "robotaxi"
-    ];
-  }
-
-  if (/태양광|재생에너지|solar|ess|smp|rec/.test(raw)) {
-    return [
-      "solar industry",
-      "renewable energy",
-      "photovoltaic",
-      "energy storage",
-      "solar supply chain"
-    ];
-  }
-
-  return ["global industry"];
-}
-
-/* ------------------------------------------------ */
-/* naver */
-/* ------------------------------------------------ */
-
-async function fetchNaverNews(query) {
-  const NAVER_ID = process.env.NAVER_CLIENT_ID;
-  const NAVER_SECRET = process.env.NAVER_CLIENT_SECRET;
-
-  if (!NAVER_ID || !NAVER_SECRET) return [];
-
-  const queries = expandQueries(query).slice(0, 10);
-
-  const results = await Promise.all(
-    queries.map(async q => {
-      try {
-        const url =
-          "https://openapi.naver.com/v1/search/news.json?" +
-          new URLSearchParams({
-            query: q,
-            display: "15",
-            sort: "date"
-          });
-
-        const response = await fetch(url, {
-          headers: {
-            "X-Naver-Client-Id": NAVER_ID,
-            "X-Naver-Client-Secret": NAVER_SECRET
-          }
-        });
-
-        if (!response.ok) return [];
-
-        const data = await response.json();
-
-        return (data.items || []).map(item =>
-          normalizeArticle({
-            sourceType: "naver",
-            source: "Naver",
-            title: item.title,
-            rawSummary: item.description,
-            link: item.originallink || item.link,
-            pubDate: item.pubDate
-          })
-        );
-      } catch {
-        return [];
-      }
-    })
-  );
-
-  return results.flat();
-}
-
-/* ------------------------------------------------ */
-/* google korea */
-/* ------------------------------------------------ */
-
-async function fetchGoogleNews(query, period) {
-  try {
-    const queries = expandQueries(query).slice(0, 8);
-
-    const results = await Promise.all(
-      queries.map(q =>
-        fetchGoogleRss({
-          q:
-            period && period !== "all"
-              ? `${q} when:${period}d`
-              : q,
-          hl: "ko",
-          gl: "KR",
-          ceid: "KR:ko",
-          sourceType: "google",
-          fallbackSource: "Google News",
-          limit: 10
-        })
-      )
-    );
-
-    return results.flat();
-  } catch {
-    return [];
-  }
-}
-
-/* ------------------------------------------------ */
-/* google global */
-/* ------------------------------------------------ */
-
-async function fetchGlobalNews(query) {
-  try {
-    const queries = expandGlobalQueries(query).slice(0, 8);
-
-    const results = await Promise.all(
-      queries.map(q =>
-        fetchGoogleRss({
-          q,
-          hl: "en-US",
-          gl: "US",
-          ceid: "US:en",
-          sourceType: "global",
-          fallbackSource: "Global News",
-          limit: 12
-        })
-      )
-    );
-
-    return removeDuplicates(results.flat())
-      .filter(item => item.title && item.link)
-      .sort((a, b) => {
-        const da = new Date(a.pubDate).getTime() || 0;
-        const db = new Date(b.pubDate).getTime() || 0;
-        return db - da;
-      })
-      .slice(0, 35);
-  } catch {
-    return [];
-  }
-}
-
-/* ------------------------------------------------ */
-/* google rss */
-/* ------------------------------------------------ */
-
-async function fetchGoogleRss({
-  q,
-  hl,
-  gl,
-  ceid,
-  sourceType,
-  fallbackSource,
-  limit
-}) {
-  try {
-    const url =
-      "https://news.google.com/rss/search?" +
-      new URLSearchParams({
-        q,
-        hl,
-        gl,
-        ceid
-      });
-
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0"
-      }
-    });
-
-    if (!response.ok) return [];
-
-    const xml = await response.text();
-
-    if (!xml || !xml.includes("<item>")) {
-      return [];
-    }
-
-    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
-
-    return items.slice(0, limit).map(match => {
-      const item = match[1];
-
-      return normalizeArticle({
-        sourceType,
-        source: clean(getTag(item, "source")) || fallbackSource,
-        title: getTag(item, "title"),
-        rawSummary: getTag(item, "description"),
-        link: getTag(item, "link"),
-        pubDate: getTag(item, "pubDate")
-      });
-    });
-  } catch {
-    return [];
-  }
-}
-
-/* ------------------------------------------------ */
-/* article */
-/* ------------------------------------------------ */
-
-function normalizeArticle({
-  sourceType,
-  source,
-  title,
-  rawSummary,
-  link,
-  pubDate
-}) {
-  const cleanTitle = clean(title);
-  const cleanSource = clean(source);
-  const cleanSummary = clean(rawSummary);
-
-  const text = `${cleanTitle} ${cleanSummary}`;
-
-  return {
-    sourceType,
-    source: cleanSource,
-    title: cleanTitle,
-    rawSummary: cleanSummary,
-    summary: makeReadableSummary(
-      cleanSummary,
-      cleanTitle,
-      cleanSource
-    ),
-    link: clean(link),
-    pubDate: clean(pubDate),
-    category: detectCategory(text),
-    score: makeScore(text),
-    insight: makeInsight(text)
-  };
-}
-
-/* ------------------------------------------------ */
-/* summary */
-/* ------------------------------------------------ */
-
-function makeReadableSummary(
-  description = "",
-  title = "",
-  source = ""
-) {
+function makeReadableSummary(description = "", title = "", source = "") {
   let text = clean(description || "");
 
   text = text
@@ -481,9 +349,7 @@ function makeReadableSummary(
     .replace(/\s+/g, " ")
     .trim();
 
-  if (!text || text.length < 25) {
-    text = clean(title || "");
-  }
+  if (!text || text.length < 25) text = clean(title || "");
 
   const sentences = text
     .split(/(?<=[.!?。！？])\s+|(?<=다\.)\s+/)
@@ -491,68 +357,36 @@ function makeReadableSummary(
     .filter(Boolean);
 
   let summary = sentences.slice(0, 2).join(" ");
-
-  if (!summary || summary.length < 25) {
-    summary = text;
-  }
-
-  if (summary.length > 220) {
-    summary = summary.slice(0, 220) + "...";
-  }
+  if (!summary || summary.length < 25) summary = text;
+  if (summary.length > 220) summary = summary.slice(0, 220) + "...";
 
   return summary || "기사 내용을 확인해 산업 흐름을 참고하세요.";
 }
 
-/* ------------------------------------------------ */
-/* insight */
-/* ------------------------------------------------ */
-
 function detectCategory(text = "") {
   const value = String(text).toLowerCase();
 
-  if (
-    /정책|정부|규제|보조금|policy|regulation|subsidy/.test(value)
-  ) {
-    return "정책";
-  }
-
-  if (
-    /시장|투자|실적|market|investment|earnings|stock/.test(value)
-  ) {
-    return "시장";
-  }
-
-  if (
-    /기술|ai|gpu|chip|battery|technology/.test(value)
-  ) {
-    return "기술";
-  }
-
-  if (
-    /리스크|논란|소송|risk|lawsuit|controversy/.test(value)
-  ) {
-    return "리스크";
-  }
+  if (/정책|정부|규제|법안|보조금|지원사업|policy|subsidy|regulation|tax credit/.test(value)) return "정책";
+  if (/시장|가격|수익|매출|실적|투자|주가|market|price|revenue|earnings|investment|finance|stock/.test(value)) return "시장";
+  if (/기술|ai|hbm|gpu|반도체|배터리|ess|인버터|플랫폼|streaming|technology|battery|chip|model/.test(value)) return "기술";
+  if (/리스크|논란|소송|계약|화재|고장|안전|공급망|risk|lawsuit|controversy|safety|delay|supply chain/.test(value)) return "리스크";
 
   return "일반";
 }
 
-function makeScore(text = "") {
+function makeScore(text = "", profile) {
   const value = String(text).toLowerCase();
-
   let score = 45;
 
-  if (/ai|solar|battery|kpop|semiconductor/.test(value)) {
-    score += 10;
-  }
+  profile.include.forEach(word => {
+    if (value.includes(String(word).toLowerCase())) score += 4;
+  });
 
-  if (/policy|investment|market|earnings/.test(value)) {
-    score += 12;
-  }
-
-  if (/risk|lawsuit|supply chain/.test(value)) {
-    score += 8;
-  }
+  if (/정책|정부|보조금|규제|policy|subsidy|regulation/.test(value)) score += 8;
+  if (/시장|가격|수익|실적|투자|market|price|earnings|investment/.test(value)) score += 8;
+  if (/기술|hbm|gpu|ess|ai|배터리|technology|chip|storage|model/.test(value)) score += 8;
+  if (/리스크|소송|논란|계약|공급망|risk|lawsuit|controversy|supply chain/.test(value)) score += 10;
+  if (/글로벌|미국|중국|일본|유럽|global|china|us|europe|japan/.test(value)) score += 5;
 
   return Math.min(score, 98);
 }
@@ -560,48 +394,26 @@ function makeScore(text = "") {
 function makeInsight(text = "") {
   const value = String(text).toLowerCase();
 
-  if (/risk|lawsuit|controversy/.test(value)) {
-    return "리스크 이슈가 감지됩니다.";
-  }
+  if (/리스크|소송|논란|계약|risk|lawsuit|controversy/.test(value)) return "리스크 이슈가 감지됩니다. 관련 기업, 일정, 계약 조건을 함께 확인해야 합니다.";
+  if (/정책|정부|보조금|규제|policy|subsidy|regulation/.test(value)) return "정책 변화가 시장 방향과 사업 판단에 영향을 줄 수 있습니다.";
+  if (/시장|가격|수익|실적|투자|market|price|earnings|investment/.test(value)) return "시장성과 수익성 변화 가능성이 있어 관련 지표를 함께 확인할 필요가 있습니다.";
+  if (/기술|hbm|gpu|ess|ai|배터리|technology|chip|storage|model/.test(value)) return "기술 변화가 경쟁 구도와 투자 포인트에 영향을 줄 수 있습니다.";
 
-  if (/policy|subsidy|regulation/.test(value)) {
-    return "정책 변화 가능성을 함께 확인할 필요가 있습니다.";
-  }
-
-  if (/market|investment|earnings/.test(value)) {
-    return "시장 흐름과 수급 변화 확인이 필요합니다.";
-  }
-
-  if (/technology|ai|battery|chip/.test(value)) {
-    return "기술 변화가 산업 흐름에 영향을 줄 수 있습니다.";
-  }
-
-  return "시장 흐름 참고용 기사입니다.";
+  return "시장 흐름 참고용 기사입니다. 관련 키워드의 반복 여부를 확인하세요.";
 }
-
-/* ------------------------------------------------ */
-/* dedupe */
-/* ------------------------------------------------ */
 
 function removeDuplicates(items) {
   const seen = new Set();
 
   return items.filter(item => {
-    const titleKey = clean(item.title || "")
-      .toLowerCase()
-      .replace(/\s+/g, " ");
-
-    const linkKey = clean(item.link || "")
-      .toLowerCase()
-      .split("?")[0];
-
+    const titleKey = clean(item.title || "").toLowerCase().replace(/\s+/g, " ");
+    const linkKey = clean(item.link || "").toLowerCase().split("?")[0];
     const key = titleKey || linkKey;
 
     if (!key) return false;
     if (seen.has(key)) return false;
 
     seen.add(key);
-
     return true;
   });
 }
