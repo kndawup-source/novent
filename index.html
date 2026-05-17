@@ -38,8 +38,6 @@ button,input,select{font-family:inherit}
 button{cursor:pointer}
 
 .app{
-  position:relative;
-  z-index:1;
   max-width:1180px;
   margin:0 auto;
   padding:44px 24px 24px;
@@ -93,12 +91,13 @@ button{cursor:pointer}
 
 .industry-tabs{
   display:flex;
-  gap:8px;
+  gap:6px;
   overflow-x:auto;
-  margin:0 0 18px;
-  padding-bottom:4px;
+  margin:0 0 14px;
+  padding-bottom:2px;
   scrollbar-width:none;
   -ms-overflow-style:none;
+  scroll-snap-type:x proximity;
 }
 
 .industry-tabs::-webkit-scrollbar{display:none}
@@ -106,13 +105,14 @@ button{cursor:pointer}
 .industry-tabs button{
   flex:0 0 auto;
   width:auto;
-  padding:10px 13px;
+  padding:8px 10px;
   border-radius:999px;
   background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.08);
   color:var(--soft);
-  font-size:12px;
+  font-size:11px;
   font-weight:900;
+  scroll-snap-align:start;
 }
 
 .industry-tabs button.active{
@@ -130,6 +130,8 @@ button{cursor:pointer}
   border-radius:30px;
   padding:30px;
   box-shadow:var(--shadow);
+  transition:background .35s ease,border-color .35s ease,transform .22s ease;
+  touch-action:pan-y;
 }
 
 .hero::before{
@@ -144,21 +146,6 @@ button{cursor:pointer}
 .hero > *{
   position:relative;
   z-index:1;
-}
-
-.hero h1{
-  margin:0 0 12px;
-  font-size:36px;
-  line-height:1.15;
-  letter-spacing:-1.8px;
-}
-
-.hero p{
-  margin:0;
-  max-width:820px;
-  color:var(--soft);
-  line-height:1.6;
-  font-size:15px;
 }
 
 .live-row{
@@ -184,6 +171,46 @@ button{cursor:pointer}
   0%{transform:scale(1);box-shadow:0 0 0 0 rgba(217,255,95,.7)}
   70%{transform:scale(1.15);box-shadow:0 0 0 10px rgba(217,255,95,0)}
   100%{transform:scale(1);box-shadow:0 0 0 0 rgba(217,255,95,0)}
+}
+
+.hero h1{
+  margin:0 0 12px;
+  font-size:36px;
+  line-height:1.15;
+  letter-spacing:-1.8px;
+}
+
+.hero p{
+  margin:0;
+  max-width:820px;
+  color:var(--soft);
+  line-height:1.6;
+  font-size:15px;
+}
+
+.hero-market-state{
+  margin-top:18px;
+  font-size:22px;
+  line-height:1.32;
+  font-weight:900;
+  letter-spacing:-.7px;
+}
+
+.hero-keywords{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:14px;
+}
+
+.hero-keywords span{
+  padding:7px 9px;
+  border-radius:999px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.08);
+  color:#def5d5;
+  font-size:11px;
+  font-weight:900;
 }
 
 .hero-update-time{
@@ -226,10 +253,7 @@ button{cursor:pointer}
   margin:18px 0;
 }
 
-.stock-strip{
-  grid-template-columns:repeat(4,1fr);
-}
-
+.stock-strip,
 .signal-strip{
   grid-template-columns:repeat(4,1fr);
 }
@@ -278,9 +302,7 @@ button{cursor:pointer}
   color:var(--blue);
 }
 
-.stock-price{
-  font-size:22px!important;
-}
+.stock-price{font-size:22px!important}
 
 .stock-change{
   margin-top:6px;
@@ -356,7 +378,6 @@ button{cursor:pointer}
 
 .toolbar.sub{
   grid-template-columns:1fr 1fr;
-  margin-bottom:10px;
 }
 
 input,
@@ -453,6 +474,13 @@ button{
   align-items:start;
   padding:15px;
   background:linear-gradient(180deg,rgba(255,255,255,.01),rgba(255,255,255,0)),var(--panel);
+  transition:transform .18s ease,border-color .18s ease,background .18s ease;
+}
+
+.news:hover{
+  transform:translateY(-2px);
+  border-color:var(--accentLine);
+  background:#102017;
 }
 
 .news,
@@ -567,6 +595,10 @@ button{
     font-size:14px;
   }
 
+  .hero-market-state{
+    font-size:19px;
+  }
+
   .hero-search-box{
     grid-template-columns:1fr;
   }
@@ -625,7 +657,7 @@ button{
 
 <nav class="industry-tabs" id="industryTabs"></nav>
 
-<section class="hero">
+<section class="hero" id="heroCard">
   <div class="live-row">
     <span class="live-dot"></span>
     LIVE INDUSTRY SIGNAL
@@ -636,6 +668,9 @@ button{
   <p id="heroDescription">
     태양광 산업의 정책, 시장, 기술, 리스크 흐름을 뉴스와 대표주 데이터를 기반으로 정리합니다.
   </p>
+
+  <div class="hero-market-state" id="heroMarketState">산업 흐름 분석 중</div>
+  <div class="hero-keywords" id="heroKeywords"></div>
 
   <div class="hero-update-time" id="heroUpdateTime">
     00:00 · Live Signal Analysis
@@ -751,6 +786,9 @@ const INDUSTRY_CONFIG = {
     description:"태양광 산업의 정책, 시장, 기술, 리스크 흐름을 정리합니다.",
     footer:"POS · Solar Intelligence Board",
     query:"solar",
+    accent:"#d9ff5f",
+    accent2:"#73ff9c",
+    heroBg:"linear-gradient(135deg,#102519,#18351f)",
     keywords:["정책","REC","SMP","ESS","인버터","계통","리스크","투자","탄소","탄소감축","탄소배출량","기후변화","재생에너지","RE100","탄소중립","넷제로","온실가스","친환경"],
     tags:["정책","수익성","ESS","계통","안전","사업기회","글로벌","탄소중립","기후변화","재생에너지","RE100","친환경"]
   },
@@ -760,6 +798,9 @@ const INDUSTRY_CONFIG = {
     description:"K-POP, 콘텐츠, 투어, 음원, 팬덤, 플랫폼 이슈를 정리합니다.",
     footer:"POS · Entertainment Intelligence Board",
     query:"entertainment",
+    accent:"#ff8fc7",
+    accent2:"#ffd36e",
+    heroBg:"linear-gradient(135deg,#271222,#3a1c2e)",
     keywords:["컴백","투어","음원","팬덤","틱톡","굿즈","계약","리스크"],
     tags:["컴백","투어","음원","팬덤","플랫폼","리스크","글로벌"]
   },
@@ -769,6 +810,9 @@ const INDUSTRY_CONFIG = {
     description:"HBM, AI칩, 메모리, 파운드리, 장비, 수출 규제 흐름을 읽습니다.",
     footer:"POS · Semiconductor Intelligence Board",
     query:"semiconductor",
+    accent:"#b69cff",
+    accent2:"#73d7ff",
+    heroBg:"linear-gradient(135deg,#17142b,#241b3f)",
     keywords:["HBM","AI칩","GPU","메모리","파운드리","수출","공급망","장비"],
     tags:["HBM","AI칩","메모리","파운드리","공급망","규제","투자"]
   },
@@ -778,6 +822,9 @@ const INDUSTRY_CONFIG = {
     description:"LLM, 에이전트, GPU, 클라우드, 모델 경쟁, 규제 흐름을 읽습니다.",
     footer:"POS · AI Intelligence Board",
     query:"ai",
+    accent:"#8ecbff",
+    accent2:"#b2fffb",
+    heroBg:"linear-gradient(135deg,#102033,#142a3d)",
     keywords:["LLM","GPU","에이전트","데이터센터","클라우드","규제","모델","자동화"],
     tags:["LLM","GPU","에이전트","인프라","규제","투자","생산성"]
   },
@@ -787,6 +834,9 @@ const INDUSTRY_CONFIG = {
     description:"전기차, 배터리, 자율주행, 로보택시, 충전 인프라 흐름을 정리합니다.",
     footer:"POS · Mobility Intelligence Board",
     query:"mobility",
+    accent:"#6effd2",
+    accent2:"#6da8ff",
+    heroBg:"linear-gradient(135deg,#0d2524,#123143)",
     keywords:["전기차","배터리","자율주행","로보택시","충전","리튬","보조금","테슬라"],
     tags:["전기차","배터리","자율주행","충전","정책","리스크","글로벌"]
   },
@@ -796,6 +846,9 @@ const INDUSTRY_CONFIG = {
     description:"ESG, 사회공헌, 지속가능경영, 캠페인, 브랜드 평판 흐름을 정리합니다.",
     footer:"POS · Impact Intelligence Board",
     query:"impact",
+    accent:"#b8ff7a",
+    accent2:"#7affc7",
+    heroBg:"linear-gradient(135deg,#122719,#1c3522)",
     keywords:["ESG","사회공헌","탄소","탄소감축","탄소배출량","기후변화","재생에너지","지속가능성","RE100","넷제로","기부","캠페인","지역사회","평판","브랜드"],
     tags:["ESG","사회공헌","지속가능","기부","캠페인","평판","브랜드","탄소중립","기후변화"]
   }
@@ -805,32 +858,66 @@ let currentIndustry = "solar";
 let newsData = [];
 let openedNewsGroups = { domesticMore:false, globalMore:false };
 let isLoadingNews = false;
+let touchStartX = 0;
+let touchStartY = 0;
 
 function config(){
   return INDUSTRY_CONFIG[currentIndustry];
+}
+
+function industryKeys(){
+  return Object.keys(INDUSTRY_CONFIG);
 }
 
 function initIndustryTabs(){
   document.getElementById("industryTabs").innerHTML = Object.entries(INDUSTRY_CONFIG).map(([key,item]) => `
     <button class="${key === currentIndustry ? "active" : ""}" onclick="switchIndustry('${key}')">${item.tab}</button>
   `).join("");
+
+  const active = document.querySelector(".industry-tabs button.active");
+  if(active){
+    active.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
+  }
 }
 
 function switchIndustry(key){
+  if(!INDUSTRY_CONFIG[key]) return;
+
   currentIndustry = key;
   openedNewsGroups = { domesticMore:false, globalMore:false };
   document.getElementById("newsSearchInput").value = "";
+
   applyIndustryConfig();
   initIndustryTabs();
   loadStocks();
   loadNews();
 }
 
+function moveIndustry(direction){
+  const keys = industryKeys();
+  const currentIndex = keys.indexOf(currentIndustry);
+  const nextIndex = (currentIndex + direction + keys.length) % keys.length;
+
+  switchIndustry(keys[nextIndex]);
+}
+
 function applyIndustryConfig(){
   const c = config();
+  const root = document.documentElement;
+  const hero = document.getElementById("heroCard");
+
+  root.style.setProperty("--accent", c.accent);
+  root.style.setProperty("--accent2", c.accent2);
+  root.style.setProperty("--accentSoft", hexToRgba(c.accent,.13));
+  root.style.setProperty("--accentLine", hexToRgba(c.accent,.28));
+
+  hero.style.background = c.heroBg;
+
   document.getElementById("heroTitle").innerHTML = c.title;
   document.getElementById("heroDescription").textContent = c.description;
   document.getElementById("footerText").textContent = c.footer;
+
+  renderHeroKeywords([]);
   updateHeroTime();
 }
 
@@ -1024,7 +1111,48 @@ function renderStats(data){
     : 0;
 
   document.getElementById("marketScore").textContent = avg + "%";
+
+  renderHeroState(data, avg);
+  renderHeroKeywords(data);
   updateHeroTime();
+}
+
+function renderHeroState(data, avg){
+  const total = Math.max(data.length,1);
+  const policy = data.filter(n=>n.category==="정책").length / total;
+  const risk = data.filter(n=>n.category==="리스크").length / total;
+  const tech = data.filter(n=>n.category==="기술").length / total;
+  const market = data.filter(n=>n.category==="시장").length / total;
+
+  let state = "산업 흐름 모니터링 구간";
+
+  if(risk >= .25){
+    state = "리스크 점검 필요 구간";
+  }else if(policy >= .25){
+    state = "정책 기대감 확대 구간";
+  }else if(tech >= .25){
+    state = "기술 변화 주목 구간";
+  }else if(market >= .25 || avg >= 70){
+    state = "시장 확장 신호 감지";
+  }
+
+  document.getElementById("heroMarketState").textContent = state;
+}
+
+function renderHeroKeywords(data){
+  const text = data
+    .map(item=>`${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""}`)
+    .join(" ")
+    .toLowerCase();
+
+  const found = config().keywords
+    .filter(k=>text.includes(k.toLowerCase()))
+    .slice(0,4);
+
+  const tags = found.length ? found : config().tags.slice(0,4);
+
+  document.getElementById("heroKeywords").innerHTML =
+    tags.map(tag=>`<span>${escapeHtml(tag)}</span>`).join("");
 }
 
 function getMainNewsScore(item){
@@ -1083,14 +1211,15 @@ function renderNewsItems(data, label){
 
   const renderOne = item => {
     const tags = getInsightTags(item);
+    const signal = Math.min(99, Math.round(getMainNewsScore(item)));
 
     return `
       <article class="news">
-        <div><div class="tag">${escapeHtml(item.category || "일반")}</div></div>
+        <div><div class="tag">SIGNAL ${signal}</div></div>
         <div>
           <h3><a class="headline-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(stripHtml(item.title))}</a></h3>
           <div class="news-summary">
-            <p class="date-text">${escapeHtml(item.source || "")} · ${formatDate(item.pubDate)}</p>
+            <p class="date-text">${escapeHtml(item.source || "")} · ${formatDate(item.pubDate)} · ${escapeHtml(item.category || "일반")}</p>
           </div>
           <div class="insight-tags">${tags.map(tag=>`<span>${escapeHtml(tag)}</span>`).join("")}</div>
         </div>
@@ -1177,7 +1306,7 @@ function renderReports(data = getFilteredData()){
     policyCount / total >= 0.25 ? "정책 변화에 민감한 구간" :
     techCount / total >= 0.25 ? "기술 변화가 관심을 끄는 구간" :
     marketCount / total >= 0.25 ? "수급과 실적 흐름을 확인할 구간" :
-    "뚜렷한 한 방향보다는 관망 흐름이 강한 구간";
+    "뚜렷한 한 방향보다는 모니터링 흐름이 강한 구간";
 
   const globalTone =
     globalCount / total >= 0.35
@@ -1208,6 +1337,33 @@ function renderReports(data = getFilteredData()){
 
   document.getElementById("salesList").innerHTML =
     `<div class="report-text">${escapeHtml(sales.replace(/\s+/g," ").trim())}</div>`;
+}
+
+function initHeroSwipe(){
+  const hero = document.getElementById("heroCard");
+
+  hero.addEventListener("touchstart", e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, {passive:true});
+
+  hero.addEventListener("touchmove", e => {
+    const diffX = e.touches[0].clientX - touchStartX;
+    const diffY = e.touches[0].clientY - touchStartY;
+
+    if(Math.abs(diffX) > Math.abs(diffY)){
+      hero.style.transform = `translateX(${Math.max(-24, Math.min(24, diffX / 6))}px)`;
+    }
+  }, {passive:true});
+
+  hero.addEventListener("touchend", e => {
+    const diffX = e.changedTouches[0].clientX - touchStartX;
+    hero.style.transform = "";
+
+    if(Math.abs(diffX) > 56){
+      moveIndustry(diffX < 0 ? 1 : -1);
+    }
+  });
 }
 
 function stripHtml(str = ""){
@@ -1251,6 +1407,14 @@ function formatDate(date){
   return d.toLocaleDateString("ko-KR");
 }
 
+function hexToRgba(hex, alpha){
+  const clean = hex.replace("#","");
+  const r = parseInt(clean.substring(0,2),16);
+  const g = parseInt(clean.substring(2,4),16);
+  const b = parseInt(clean.substring(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 document.getElementById("newsSearchInput").addEventListener("keydown", e => {
   if(e.key === "Enter"){
     searchNewsAndMove();
@@ -1264,6 +1428,7 @@ window.addEventListener("resize", render);
 
 initIndustryTabs();
 applyIndustryConfig();
+initHeroSwipe();
 loadStocks();
 loadNews();
 
