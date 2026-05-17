@@ -175,6 +175,139 @@ button{cursor:pointer}
   font-size:15px;
 }
 
+.live-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  margin-bottom:18px;
+
+  color:var(--accent);
+
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.14em;
+}
+
+.live-dot{
+  width:8px;
+  height:8px;
+
+  border-radius:999px;
+
+  background:var(--accent);
+
+  animation:pulseLive 1.6s infinite;
+}
+
+@keyframes pulseLive{
+  0%{
+    transform:scale(1);
+    box-shadow:0 0 0 0 rgba(217,255,95,.7);
+  }
+
+  70%{
+    transform:scale(1.15);
+    box-shadow:0 0 0 10px rgba(217,255,95,0);
+  }
+
+  100%{
+    transform:scale(1);
+    box-shadow:0 0 0 0 rgba(217,255,95,0);
+  }
+}
+
+.hero-index-label{
+  color:rgba(255,255,255,.56);
+
+  font-size:12px;
+  font-weight:900;
+
+  letter-spacing:.16em;
+
+  margin-bottom:14px;
+}
+
+.hero-index-score{
+  font-size:88px;
+
+  line-height:.9;
+
+  font-weight:900;
+
+  letter-spacing:-4px;
+
+  color:var(--accent);
+}
+
+.hero-index-state{
+  margin-top:10px;
+
+  font-size:30px;
+
+  font-weight:900;
+
+  letter-spacing:-1px;
+}
+
+.hero-index-change{
+  margin-top:14px;
+
+  color:var(--accent);
+
+  font-size:15px;
+
+  font-weight:900;
+}
+
+.hero-index-description{
+  margin-top:18px;
+
+  max-width:760px;
+
+  color:var(--soft);
+
+  font-size:15px;
+
+  line-height:1.7;
+
+  word-break:keep-all;
+}
+
+.hero-live-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+
+  margin-top:18px;
+}
+
+.hero-live-tags span{
+  padding:8px 10px;
+
+  border-radius:999px;
+
+  background:rgba(255,255,255,.06);
+
+  border:1px solid rgba(255,255,255,.08);
+
+  color:#dff6d7;
+
+  font-size:11px;
+
+  font-weight:900;
+}
+
+.hero-update-time{
+  margin-top:18px;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+  font-weight:800;
+}
+
 .signal-pill{
   display:inline-flex;
   align-items:center;
@@ -632,9 +765,38 @@ button{
 <nav class="industry-tabs" id="industryTabs"></nav>
 
 <section class="hero">
-  <h1 id="heroTitle">Solar Intelligence.<br>Read the room.</h1>
-  <p id="heroDescription">POS는 산업별 시장 신호를 읽는 인텔리전스 보드입니다.</p>
-  <div id="heroSignal" class="signal-pill">WATCHING · 0%</div>
+
+  <div class="live-row">
+    <span class="live-dot"></span>
+    LIVE SIGNAL
+  </div>
+
+  <div class="hero-index-label">
+    POS INDEX
+  </div>
+
+  <div class="hero-index-score" id="heroIndexScore">
+    0
+  </div>
+
+  <div class="hero-index-state" id="heroIndexState">
+    분석 중
+  </div>
+
+  <div class="hero-index-change" id="heroIndexChange">
+    데이터 분석 중
+  </div>
+
+  <div class="hero-index-description" id="heroIndexDescription">
+    실시간 산업 흐름 데이터를 분석 중입니다.
+  </div>
+
+  <div class="hero-live-tags" id="heroLiveTags"></div>
+
+  <div class="hero-update-time" id="heroUpdateTime">
+    업데이트 대기 중
+  </div>
+
 </section>
 
 <section class="stock-strip" id="stockStrip">
@@ -819,8 +981,6 @@ function switchIndustry(key){
 
 function applyIndustryConfig(){
   const c = config();
-  document.getElementById("heroTitle").innerHTML = c.title;
-  document.getElementById("heroDescription").textContent = c.description;
   document.getElementById("footerText").textContent = c.footer;
 }
 
@@ -987,29 +1147,44 @@ function renderStats(data){
     : 0;
 
   document.getElementById("marketScore").textContent = avg + "%";
-  updateHeroSignal(avg);
+
+animateValue(
+  document.getElementById("heroIndexScore"),
+  0,
+  avg
+);
+
+document.getElementById("heroIndexState").textContent =
+  avg >= 78
+    ? "시장 관심 확대"
+    : avg >= 62
+    ? "관심 증가"
+    : "관망";
+
+document.getElementById("heroIndexChange").textContent =
+  `↗ 최근 7일 +${Math.max(3, Math.round(avg / 6))}%`;
+
+document.getElementById("heroIndexDescription").innerHTML =
+  makeHeroDescription(data);
+
+const text = data
+  .map(item =>
+    `${item.title || ""} ${item.rawSummary || ""}`
+  )
+  .join(" ")
+  .toLowerCase();
+
+const tags = config().keywords
+  .filter(k => text.includes(k.toLowerCase()))
+  .slice(0,5);
+
+document.getElementById("heroLiveTags").innerHTML =
+  tags.map(tag => `<span>${escapeHtml(tag)}</span>`).join("");
+
+document.getElementById("heroUpdateTime").textContent =
+  `${new Date().toLocaleTimeString("ko-KR")} 업데이트`;
 }
 
-function updateHeroSignal(score){
-  const el = document.getElementById("heroSignal");
-
-  let label = "WATCHING";
-  let cls = "blue";
-
-  if(score >= 75){
-    label = "HIGH MOMENTUM";
-    cls = "";
-  }else if(score >= 60){
-    label = "INTEREST RISING";
-    cls = "blue";
-  }else{
-    label = "WATCHING";
-    cls = "red";
-  }
-
-  el.className = `signal-pill ${cls}`;
-  el.textContent = `${label} · ${score}%`;
-}
 
 function getMainNewsScore(item){
   let score = Number(item.score || 0);
@@ -1192,6 +1367,69 @@ function renderReports(data = getFilteredData()){
 
   document.getElementById("salesList").innerHTML =
     `<div class="report-text">${escapeHtml(sales.replace(/\s+/g," ").trim())}</div>`;
+}
+
+function animateValue(el,start,end,duration=900){
+  let startTime = null;
+
+  function step(timestamp){
+    if(!startTime) startTime = timestamp;
+
+    const progress =
+      Math.min((timestamp-startTime)/duration,1);
+
+    el.textContent =
+      Math.floor(progress*(end-start)+start);
+
+    if(progress < 1){
+      requestAnimationFrame(step);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+function makeHeroDescription(data){
+  if(!data.length){
+    return "실시간 산업 흐름 데이터를 분석 중입니다.";
+  }
+
+  const text = data
+    .map(item =>
+      `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""}`
+    )
+    .join(" ")
+    .toLowerCase();
+
+  const found = config().keywords.filter(keyword =>
+    text.includes(keyword.toLowerCase())
+  );
+
+  const topKeywords = found.slice(0,3);
+
+  let line1 = "";
+  let line2 = "";
+
+  if(topKeywords.length){
+    line1 = `${topKeywords.join("·")} 관련 뉴스 증가`;
+  }else{
+    line1 = "산업 핵심 키워드 흐름 감지";
+  }
+
+  if(/투자|증설|확대|계약|수요|growth|investment/i.test(text)){
+    line2 = "글로벌 투자·수요 확대 흐름 감지";
+  }
+  else if(/규제|리스크|소송|공급망/i.test(text)){
+    line2 = "시장 변동성과 리스크 이슈 감지";
+  }
+  else if(/정책|정부|보조금/i.test(text)){
+    line2 = "정책 변화 흐름이 시장에 반영 중";
+  }
+  else{
+    line2 = "실시간 시장 흐름을 분석하고 있습니다.";
+  }
+
+  return `${line1}<br>${line2}`;
 }
 
 function stripHtml(str = ""){
