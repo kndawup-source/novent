@@ -776,28 +776,21 @@ button{
 
   <div class="live-row">
     <span class="live-dot"></span>
-    LIVE SIGNAL
+    LIVE INDUSTRY SIGNAL
   </div>
 
-  <div class="hero-index-label">
-    POS INDEX
-  </div>
+  <h1 id="heroTitle">
+    Solar Intelligence.<br>
+    Read the room.
+  </h1>
 
-  <div class="hero-index-score" id="heroIndexScore">
-    0
-  </div>
-
-  <div class="hero-index-state" id="heroIndexState">
-    분석 중
-  </div>
-
-  <div class="hero-index-description" id="heroIndexDescription">
-    실시간 산업 흐름 데이터를 분석 중입니다.
-  </div>
-
+  <p id="heroDescription">
+    태양광 산업의 정책, 시장, 기술, 리스크 흐름을
+    뉴스와 대표주 데이터를 기반으로 정리합니다.
+  </p>
 
   <div class="hero-update-time" id="heroUpdateTime">
-    업데이트 대기 중
+    11:14 · Live Signal Analysis
   </div>
 
 </section>
@@ -1157,48 +1150,11 @@ function renderStats(data){
     : 0;
 
   document.getElementById("marketScore").textContent = avg + "%";
-  
-  const scoreEl = document.getElementById("heroIndexScore");
+  document.getElementById("heroTitle").innerHTML =
+  config().title;
 
-if (avg >= 78) {
-  scoreEl.style.color = "var(--accent)";
-} else if (avg >= 60) {
-  scoreEl.style.color = "#9ad6ff";
-} else {
-  scoreEl.style.color = "#ff9a9a";
-}
-
-const currentValue =
-  Number(scoreEl.textContent.replace(/[^0-9]/g,"")) || 0;
-
-animateValue(
-  scoreEl,
-  currentValue,
-  avg
-);
-
-
-
-document.getElementById("heroIndexState").textContent =
-  avg >= 78
-    ? "시장 확장 신호 감지"
-    : avg >= 62
-    ? "수요 반응 증가 구간"
-    : "시장 변동성 모니터링";
-
-document.getElementById("heroIndexDescription").innerHTML =
-  makeHeroDescription(data);
-
-const text = data
-  .map(item =>
-    `${item.title || ""} ${item.rawSummary || ""}`
-  )
-  .join(" ")
-  .toLowerCase();
-
-const tags = config().keywords
-  .filter(k => text.includes(k.toLowerCase()))
-  .slice(0,5);
+document.getElementById("heroDescription").textContent =
+  config().description;
 
 document.getElementById("heroUpdateTime").textContent =
   `${new Date().toLocaleTimeString("ko-KR", {
@@ -1391,51 +1347,6 @@ function renderReports(data = getFilteredData()){
   document.getElementById("salesList").innerHTML =
     `<div class="report-text">${escapeHtml(sales.replace(/\s+/g," ").trim())}</div>`;
 }
-
-function animateValue(el,start,end,duration=900){
-  let startTime = null;
-
-  function step(timestamp){
-    if(!startTime) startTime = timestamp;
-
-    const progress =
-      Math.min((timestamp-startTime)/duration,1);
-
-    el.textContent =
-      Math.floor(progress*(end-start)+start);
-
-    if(progress < 1){
-      requestAnimationFrame(step);
-    }
-  }
-
-  requestAnimationFrame(step);
-}
-
-function makeHeroDescription(data){
-
-  if(!data.length){
-    return "산업 흐름 분석 중";
-  }
-
-  const text = data
-    .map(item =>
-      `${item.title || ""} ${item.rawSummary || ""}`
-    )
-    .join(" ")
-    .toLowerCase();
-
-  const found = config().keywords.filter(keyword =>
-    text.includes(keyword.toLowerCase())
-  );
-
-  if(found.length){
-    return `${found[0]} 중심 시장 반응 확대`;
-  }
-
-  return "산업 흐름 분석 중";
-}
-
 
 function stripHtml(str = ""){
   let value = String(str || "");
