@@ -968,6 +968,7 @@ const INDUSTRY_CONFIG = {
 let currentIndustry = "solar";
 let newsData = [];
 let openedNewsGroups = { domesticMore:false, globalMore:false };
+let isLoadingNews = false;
 
 function config(){
   return INDUSTRY_CONFIG[currentIndustry];
@@ -1075,6 +1076,10 @@ function toggleStockMore(button){
 }
 
 async function loadNews(){
+
+  if(isLoadingNews) return;
+
+  isLoadingNews = true;
   const keyword = document.getElementById("newsSearchInput").value.trim();
   const topic = keyword || config().query;
   const period = document.getElementById("periodFilter").value;
@@ -1096,10 +1101,12 @@ async function loadNews(){
     render();
 
     status.textContent = `총 ${newsData.length}개 산업 신호를 분석했습니다. 국내 ${data.debug?.domesticCount || 0}개 · 해외 ${data.debug?.globalCount || 0}개`;
-  }catch{
+    }catch{
     status.textContent = "뉴스를 불러오지 못했습니다. /api/news 경로와 환경변수를 확인해주세요.";
     newsData = [];
     render();
+  }finally{
+    isLoadingNews = false;
   }
 }
 
