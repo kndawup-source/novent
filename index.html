@@ -1214,7 +1214,10 @@ document.getElementById("heroLiveTags").innerHTML =
   tags.map(tag => `<span>${escapeHtml(tag)}</span>`).join("");
 
 document.getElementById("heroUpdateTime").textContent =
-  `${new Date().toLocaleTimeString("ko-KR")} 기준 · 데이터 업데이트`;
+  `${new Date().toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  })} 업데이트`;
 }
 
 
@@ -1523,16 +1526,6 @@ loadNews();
 setInterval(() => {
   loadNews();
 }, 180000);
-
-setInterval(() => {
-  const el = document.getElementById("heroUpdateTime");
-  if (!el) return;
-
-  el.textContent =
-
-    `${new Date().toLocaleTimeString("ko-KR")} 기준 · 실시간 분석 중`;
-
-}, 1000);
 
 </script>
 </body>
