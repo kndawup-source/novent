@@ -1413,13 +1413,14 @@ function animateValue(el,start,end,duration=900){
 }
 
 function makeHeroDescription(data){
+
   if(!data.length){
-    return "실시간 산업 흐름 데이터를 분석 중입니다.";
+    return "산업 흐름 분석 중";
   }
 
   const text = data
     .map(item =>
-      `${item.title || ""} ${item.rawSummary || ""} ${item.summary || ""}`
+      `${item.title || ""} ${item.rawSummary || ""}`
     )
     .join(" ")
     .toLowerCase();
@@ -1428,29 +1429,12 @@ function makeHeroDescription(data){
     text.includes(keyword.toLowerCase())
   );
 
-  const topKeywords = found.slice(0,3);
-
-  let line1 = "";
-  let line2 = "";
-
-  if(topKeywords.length){
-    line1 = `${topKeywords.join("·")} 관련 뉴스 증가`;
-  }else{
-    line1 = "산업 핵심 키워드 흐름 감지";
+  if(found.length){
+    return `${found[0]} 중심 시장 반응 확대`;
   }
 
-  if(/투자|증설|확대|계약|수요|growth|investment/i.test(text)){
-    line2 = "글로벌 투자·수요 확대 흐름 감지";
-  }
-  else if(/규제|리스크|소송|공급망/i.test(text)){
-    line2 = "시장 변동성과 리스크 이슈 감지";
-  }
-  else if(/정책|정부|보조금/i.test(text)){
-    line2 = "정책 변화 흐름이 시장에 반영 중";
-  }
-  else{
-    line2 = "실시간 시장 흐름을 분석하고 있습니다.";
-  }
+  return "산업 흐름 분석 중";
+}
 
   return `${line1}<br>${line2}`;
 }
