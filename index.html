@@ -791,15 +791,10 @@ button{
     분석 중
   </div>
 
-  <div class="hero-index-change" id="heroIndexChange">
-    데이터 분석 중
-  </div>
-
   <div class="hero-index-description" id="heroIndexDescription">
     실시간 산업 흐름 데이터를 분석 중입니다.
   </div>
 
-  <div class="hero-live-tags" id="heroLiveTags"></div>
 
   <div class="hero-update-time" id="heroUpdateTime">
     업데이트 대기 중
@@ -1191,9 +1186,6 @@ document.getElementById("heroIndexState").textContent =
     ? "수요 반응 증가 구간"
     : "시장 변동성 모니터링";
 
-document.getElementById("heroIndexChange").textContent =
-  `↗ 최근 7일 +${Math.max(3, Math.round(avg / 6))}%`;
-
 document.getElementById("heroIndexDescription").innerHTML =
   makeHeroDescription(data);
 
@@ -1207,9 +1199,6 @@ const text = data
 const tags = config().keywords
   .filter(k => text.includes(k.toLowerCase()))
   .slice(0,5);
-
-document.getElementById("heroLiveTags").innerHTML =
-  tags.map(tag => `<span>${escapeHtml(tag)}</span>`).join("");
 
 document.getElementById("heroUpdateTime").textContent =
   `${new Date().toLocaleTimeString("ko-KR", {
