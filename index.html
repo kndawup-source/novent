@@ -247,11 +247,13 @@ button{cursor:pointer}
 .hero-index-state{
   margin-top:10px;
 
-  font-size:30px;
+  font-size:22px;
+
+  line-height:1.3;
 
   font-weight:900;
 
-  letter-spacing:-1px;
+  letter-spacing:-0.6px;
 }
 
 .hero-index-change{
@@ -1182,10 +1184,10 @@ animateValue(
 
 document.getElementById("heroIndexState").textContent =
   avg >= 78
-    ? "시장 관심 확대"
+    ? "시장 확장 신호 감지"
     : avg >= 62
-    ? "관심 증가"
-    : "관망";
+    ? "수요 반응 증가 구간"
+    : "시장 변동성 모니터링";
 
 document.getElementById("heroIndexChange").textContent =
   `↗ 최근 7일 +${Math.max(3, Math.round(avg / 6))}%`;
