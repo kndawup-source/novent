@@ -1212,10 +1212,19 @@ function renderNewsItems(data, label){
   const renderOne = item => {
     const tags = getInsightTags(item);
     const signal = Math.min(99, Math.round(getMainNewsScore(item)));
+    let signalState = "WATCH";
+
+if(signal >= 85){
+  signalState = "HIGH";
+}else if(signal >= 70){
+  signalState = "TREND";
+}else if(item.category === "리스크"){
+  signalState = "RISK";
+}
 
     return `
       <article class="news">
-        <div><div class="tag">SIGNAL ${signal}</div></div>
+        <div><div class="tag">SIGNAL ${signal} · ${signalState}</div></div>
         <div>
           <h3><a class="headline-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(stripHtml(item.title))}</a></h3>
           <div class="news-summary">
